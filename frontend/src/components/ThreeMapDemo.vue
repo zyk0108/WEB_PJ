@@ -316,10 +316,6 @@
 
         //用户名列表
         listName:[],
-
-        //上下线的人
-        changeUser: null,
-
         //场景
         scene: 'museum'
       }
