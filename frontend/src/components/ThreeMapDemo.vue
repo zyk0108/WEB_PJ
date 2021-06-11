@@ -7,7 +7,7 @@
     </section>
 
     <div id="blocker">
-      <div id="instructions">
+      <div id="instructions" @click="clickTheScene()">
         <span style="font-size:40px">Click to Start (Continue)</span>
         <br/>
         (W, A, S, D = Move, MOUSE = Look around)
@@ -24,10 +24,12 @@
   import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
   import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
   import ChatRoom from './Chat'
+  import JWT from 'jwt-decode'
   export default {
     name: "ThreeMapDemo",
     data(){
       return{
+        theName: JWT(this.$store.state.token).sub,
         camera: null,
         webglScene: null,
         renderer: null,
@@ -204,21 +206,18 @@
 
         //Other users
         otherUsers:[
-          {
-            username: '',
-            obj: '../../static/models/robot.glb',
-            scale: 4,
-            position: {x: -300, y: -4, z: -140},
-            rotation: {x: 0, y: 380, z: 0},
-          },
-          {
-            username: '',
-            obj: '../../static/models/robot.glb',
-            scale: 4,
-            position: {x: -200, y: -4, z: -140},
-            rotation: {x: 0, y: 380, z: 0},
-          }
+          // {
+          //   username: '',
+          //   obj: '../../static/models/robot.glb',
+          //   scale: 4,
+          //   position: {x: -200, y: -4, z: -140},
+          //   rotation: {x: 0, y: 380, z: 0},
+          // }
         ],
+
+        playerMap:null,
+
+        otherUserNum: 0,
 
 
         //位置信息
@@ -234,21 +233,22 @@
       ChatRoom
     },
     mounted() {
+      this.playerMap = new Map();
       this.createScene(document.getElementById("theCanvas"));
-      this.animate()
+      this.animate();
     },
     methods: {
       //其他人的位置更新
       updateOtherUsersPosition(userId,position){
-        for (let i = 0; i < this.otherUsers.length; i++) {
-          if (this.otherUsers[i].username === userId) {
-            this.otherUsers[i].position=new THREE.Vector3(position);
-            break;
-          }
+        if (this.playerMap.has(userId)) {
+          let model = this.playerMap.get(userId);
+          console.log(new THREE.Vector3(position)+"zzzzzzzzzzzzz");
+          model.position.set(position);
+          //model.rotation.set(data.rotation._x, data.rotation._y + Math.PI / 2, data.rotation._z);
         }
       },
 
-      //自己上线
+      //自己上线加载其他所有用户的数据
       addAllUser(allOtherUsersPosition){
         for (let i = 0; i < allOtherUsersPosition.length; i++) {
           this.otherUsers.push({
@@ -259,26 +259,50 @@
             rotation: {x: 0, y: 380, z: 0},
           });
         }
+        this.otherUserNum = this.otherUsers.length;
+        this.loadOtherUsers();
       },
 
-      //他人上线
+      //其他人上线
       addUser(userId){
         this.otherUsers.push({
           username: userId,
           obj: '../../static/models/robot.glb',
           scale: 4,
-          position: {x: -300, y: 20, z: -100},
+          position: {x: -300, y: 0, z: -100},
           rotation: {x: 0, y: 380, z: 0},
         });
+        this.otherUserNum += 1;
+
+        let obj = this.otherUsers[this.otherUsers.length-1];
+        let loader = new GLTFLoader();
+        try {
+          loader.load(obj.obj,(model)=>{
+            console.log(model,'load online');
+            console.log(obj.username,"vvvvvvvvvvvvvvvvvvvvvv");
+            this.playerMap.set(obj.username,model.scene);
+            model.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
+            model.scene.scale.set(obj.scale, obj.scale, obj.scale);
+            model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+            this.webglScene.add(model.scene);
+          });
+        }catch (e) {
+          console.log(e);
+        }
       },
 
-      //下线
+      //其他人下线
       deleteUser(userId){
         for (let i = 0; i < this.otherUsers.length; i++) {
           if (this.otherUsers[i].username === userId) {
             this.otherUsers.splice(i, 1);
             break;
           }
+        }
+        this.otherUserNum = this.otherUsers.length;
+        if (this.playerMap.has(userId)) {
+          this.root.remove(this.playerMap.get(userId));
+          this.playerMap.delete(userId);
         }
       },
 
@@ -396,11 +420,11 @@
         //     this.root.add(theList[i]);
         //   }
         // });
-        this.loadOtherUsers().then(theList=>{
-          for (let i = 0; i < theList.length; i++) {
-            console.log('Other user: ', i);
-          }
-        });
+        // this.loadOtherUsers().then(theList=>{
+        //   for (let i = 0; i < theList.length; i++) {
+        //     console.log('Other user: ', i);
+        //   }
+        // });
 
         //this.myObj.position.x = -100
         //add the video
@@ -588,13 +612,13 @@
         let obj = this.myObj;
         let loader = new GLTFLoader();
         try {
-          await loader.load(obj.obj,(gltf)=>{
-            console.log(gltf,'hhhhhhhhhhhhhhh');
-            gltf.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
-            gltf.scene.scale.set(obj.scale, obj.scale, obj.scale);
-            gltf.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
-            this.root.add(gltf.scene);
-            this.me = gltf.scene;
+          await loader.load(obj.obj,(model)=>{
+            console.log(model,'load myself');
+            model.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
+            model.scene.scale.set(obj.scale, obj.scale, obj.scale);
+            model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+            this.root.add(model.scene);
+            this.me = model.scene;
           });
           return this.me;
         } catch (e) {
@@ -627,22 +651,18 @@
         let controls = new PointerLockControls(this.camera, document.body);
         this.controls = controls;//undefined?????
 
-        controls.addEventListener('lock', function () {
+        this.controls.addEventListener('lock', function () {
           theBlocker.style.display = 'none';
           theInstruction.style.display = 'none';
         });
 
-        controls.addEventListener('unlock', function () {
+        this.controls.addEventListener('unlock', function () {
           theBlocker.style.display = 'block';
           theInstruction.style.display = '';
+          console.log(this.myPosition,"iiiiiiiiiiiiiiiiiiiiii");
         });
 
-        this.instructions.addEventListener('click', function () {
-          console.log(this.controls)
-          controls.lock();
-          console.log("test kkk")
-        }, false);
-        console.log("test xxx")
+        console.log("test xxx");
         //设置初始的位置
         controls.getObject().position.x = -300;
         controls.getObject().position.y = 20;
@@ -807,18 +827,19 @@
       },
 
       //加载其他用户
-      async loadOtherUsers() {
+      loadOtherUsers() {
         let userList=[];
         let loader = new GLTFLoader();
         try {
           for (let i = 0; i < this.otherUsers.length; i++) {
             let obj = this.otherUsers[i];
-            await loader.load(obj.obj,(gltf)=>{
+            loader.load(obj.obj,(gltf)=>{
               console.log(gltf,'other users load hhh');
+              this.playerMap.set(obj.username,gltf.scene);
               gltf.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
               gltf.scene.scale.set(obj.scale, obj.scale, obj.scale);
               gltf.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
-              this.root.add(gltf.scene);
+              this.webglScene.add(gltf.scene);
               userList.push(gltf.scene);
             });
           }
@@ -831,6 +852,53 @@
       /**********************************run the 3D scene************************************/
       animate() {
         requestAnimationFrame(this.animate);
+
+        //控制其他的用户的上下线
+        let userNum = this.$refs.chatRoom.listName.length-2;
+        console.log(userNum,"lllllllzyk");
+        if (userNum !== this.otherUserNum) {
+          console.log("oooooooooooooooooooooooooooooooooooooooooo");
+          if (userNum > this.otherUserNum) {
+            if (this.$refs.chatRoom.changeUser === null) {
+              //初始化其他用户数据
+              let theUserArr = this.$refs.chatRoom.allOtherUsersPosition;
+              this.addAllUser(theUserArr);
+              console.log(this.otherUserNum,"iiiccccc");
+            }else {
+              this.addUser(this.$refs.chatRoom.changeUser);
+            }
+
+          }else {
+            this.deleteUser(this.$refs.chatRoom.changeUser);
+          }
+        }
+        //console.log(userNum,"kkkooo");
+
+
+        //控制其他用户的坐标移动
+        let thePosition = this.$refs.chatRoom.thePosition;
+        let len = thePosition.length;
+        for (let i = 0; i < len; i++) {
+          let id = thePosition[0].userId;
+          let position = {x:thePosition[0].x,y:thePosition[0].y,z:thePosition[0].z};
+          console.log(this.playerMap,"nnnnnnnnnn",id);
+          if (this.playerMap.has(id)) {
+            let model = this.playerMap.get(id);
+            console.log(position);
+            model.position = new THREE.Vector3(position);
+            //model.position.set(position);
+            console.log("in aaaaaaaaaaaaaaaaaaaaaa");
+            console.log(this.me.position);
+            console.log(this.controls.getObject().position);
+            console.log(thePosition);
+            this.$refs.chatRoom.thePosition.splice(0,1);
+            console.log(this.$refs.chatRoom.thePosition,"after");
+          }
+          //this.updateOtherUsersPosition(id,position);
+          //this.$refs.chatRoom.thePosition.splice(0,1);
+        }
+        //console.log(thePosition);
+
         if (this.controls.isLocked) {
           let time = performance.now();
           let delta = (time - this.prevTime) / 1000;
@@ -870,7 +938,7 @@
             this.velocity.y += this.direction.y * 400.0 * delta;
           }
 
-          this.wallCollider.find(element => {
+          this.wallCollider.find(element => {//碰墙检测
             if (element.containsPoint(this.controls.getObject().position)) {
               if ((this.direction.x > 0 && this.direction.z < 0) || (this.direction.x < 0 && this.direction.z > 0)) {
                 this.velocity.z = Math.max(0, this.velocity.z);
@@ -912,10 +980,8 @@
             }
           });
 
-          let deltaX=-this.velocity.x * delta;
-          let deltaY=-this.velocity.z * delta;
-          this.controls.moveRight(deltaX);
-          this.controls.moveForward(deltaY);
+          this.controls.moveRight(-this.velocity.x * delta);
+          this.controls.moveForward(-this.velocity.z * delta);
 
           //控制本身模型移动
           let a=this.controls.getObject().position.x;
@@ -926,6 +992,10 @@
 
           this.me.position = new THREE.Vector3(a,b,c);
 
+          //发送自己的坐标
+          this.judgePosition(a,b,c);
+
+          console.log(a,b,c);
           //相机上下
           let height = this.velocity.y * delta;
           let srcHeight = this.controls.getObject().position.y;
@@ -939,8 +1009,31 @@
           this.prevTime = time;
         }
         this.renderer.render(this.webglScene, this.camera);
-      }
+      },
 
+      judgePosition(x,y,z){
+        let srcX = this.myPosition.x;
+        let srcY = this.myPosition.y;
+        let srcZ = this.myPosition.z;
+        if (x !== srcX || y !== srcY || srcZ !== z) {
+          this.setMyPosition(x,y,z);
+          this.$refs.chatRoom.webSocketSend(this.theName,x,y,z);
+        }
+      },
+
+      setMyPosition(x,y,z){
+        this.myPosition.x=x;
+        this.myPosition.y=y;
+        this.myPosition.z=z;
+      },
+
+      clickTheScene(){
+        console.log(this.controls);
+        this.controls.lock();
+        console.log(this.myPosition);
+        console.log(this.controls.getObject().position);
+        console.log("test kkk")
+      }
     }
   }
 </script>

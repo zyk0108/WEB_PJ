@@ -121,6 +121,9 @@
         //更新的某个用户的坐标
         thePosition:[],
 
+        //上下线的人
+        changeUser: null,
+
         //场景
         scene: 'museum'
       }
@@ -194,8 +197,14 @@
                 if (!flag) {
                   this.infoList.push({name: content, data: []});
                 }
+                //add
+                this.changeUser = content;
+
                 content = content + ' is ' + type;
               }else{
+                //add
+                this.changeUser = content;
+
                 content = content + ' is ' + type + ' again!';
               }
             }else{
@@ -207,6 +216,10 @@
                 this.listName.splice(index,1);
                 console.log(index);
               }
+
+              //add
+              this.changeUser = content;
+
               console.log('after offline:',this.listName);
               content = content + ' is ' + type +'!';
             }
@@ -244,11 +257,13 @@
             }else{
               //对特定的用户userId进行坐标的更新
               let userId = content.username;
-              // let x = content.x;
-              // let y = content.y;
-              // let z = content.z;
+              let x = content.x;
+              let y = content.y;
+              let z = content.z;
               //this.thePosition = [];
-              this.thePosition.push({userId: userId, position: content});
+              this.thePosition.push({userId: userId, x: x, y: y, z: z});
+              console.log(this.thePosition,"chat true mmmmmmmmm");
+              console.log(this.thePosition[0],"chat true mmmmmmmmm");
             }
           }
         }else{
