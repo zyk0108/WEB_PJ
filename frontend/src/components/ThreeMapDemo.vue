@@ -956,7 +956,7 @@
         let srcZ = this.myPosition.z;
         if (x !== srcX || y !== srcY || srcZ !== z) {
           this.setMyPosition(x,y,z);
-          this.webSocketSend(this.userName,x,y,z);
+          this.webSocketSend(this.userName,x,y,z,this.theObj.rotation.x,this.theObj.rotation.y,this.theObj.rotation.z);
         }
       },
 
@@ -1021,13 +1021,19 @@
                 }
                 //add
                 this.addUser(content);
-
                 content = content + ' is ' + type;
+                this.$message({
+                  message: content,
+                  type: 'success'
+                });
               }else{
                 //add
                 this.addUser(content);
-
                 content = content + ' is ' + type + ' again!';
+                this.$message({
+                  message: content,
+                  type: 'success'
+                });
               }
             }else{
               //下线
@@ -1041,9 +1047,9 @@
 
               //delete
               this.deleteUser(content);
-
               console.log('after offline:',this.listName);
               content = content + ' is ' + type +'!';
+              this.$message(content);
             }
             //this.data = this.infoList[0].data;
             this.addMessage(this.infoList[0].data, 0, 'system', content);
@@ -1061,13 +1067,16 @@
             if (fromUsername === 'system') {
               //加入场景的时候返回所有的用户信息
               let resObj = null, userId;
-              let x,y,z;
+              let x,y,z,rx,ry,rz;
               for (let i = 0; i < content.length; i++) {
                 resObj = JSON.parse(content[i]);
                 userId = resObj.userID;
                 x = resObj.x;
                 y = resObj.y;
                 z = resObj.z;
+                rx = resObj.rx;
+                ry = resObj.ry;
+                rz = resObj.rz;
                 if ( userId !== this.userName ) {
                   this.listName.push(userId);
                   this.infoList.push({name: userId, data: []});
@@ -1078,8 +1087,8 @@
                     loader.load(obj.obj,(model)=>{
                       console.log(model,'load online');
                       model.scene.position.set(x,y,z);
+                      model.scene.rotation.set(rx, ry, rz);
                       model.scene.scale.set(obj.scale, obj.scale, obj.scale);
-                      model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
                       this.playerMap.set(userId,model.scene);
                       this.webglScene.add(model.scene);
                     });
@@ -1094,10 +1103,13 @@
               let x = content.x;
               let y = content.y;
               let z = content.z;
+              let rx = content.rx;
+              let ry = content.ry;
+              let rz = content.rz;
               if (this.playerMap.has(userId)) {
                 let model = this.playerMap.get(userId);
                 model.position.set(x,y,z);
-                //model.rotation.set(data.rotation._x, data.rotation._y + Math.PI / 2, data.rotation._z);
+                model.rotation.set(rx, ry, rz);
               }
             }
           }
@@ -1132,7 +1144,7 @@
         console.log("websocket close ...");
       },
 
-      webSocketSend(username, x, y, z) {
+      webSocketSend(username, x, y, z, rx, ry, rz) {
         //发送消息
         let len = arguments.length;
         if (len === 0) {//判断是否为发送信息
@@ -1166,7 +1178,10 @@
             username: username,
             x: x,
             y: y,
-            z: z
+            z: z,
+            rx: rx,
+            ry: ry,
+            rz: rz
           };
           let send_data = {isSystem: true, type: "coordinate", toUsername: 'not_used', content: content};
           send_data = JSON.stringify(send_data);
