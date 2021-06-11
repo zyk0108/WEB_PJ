@@ -235,13 +235,13 @@
             propertiesFont: {size: 7, height: 1},
           },
           {
-            message: 'Tne Video Instruction',//门墙视频标题
-            position: {x: 1, y: 230, z: -210},
+            message: 'Tne Star Wars Video Instruction',//门墙视频标题
+            position: {x: 1, y: 230, z: -230},
             rotation: {x: 0, y: -Math.PI / 2, z: 0},
             propertiesFont: {size: 7, height: 1},
           },
           {
-            message: 'Computers Exhibition Hall',//展厅标题
+            message: 'Car models Exhibition Hall',//展厅标题
             position: {x: 1, y: 180, z: -630},
             rotation: {x: 0, y: -Math.PI / 2, z: 0},
             propertiesFont: {size: 15, height: 1},
@@ -283,7 +283,6 @@
         //me
         theObj: {
           obj: '../../static/models/robot.glb',
-          map: "../../static/models/mapDefault.png",
           scale: 4,
           position: {x: -300, y: 0, z: -110},
           rotation: {x: 0, y: 380, z: 0},
@@ -301,6 +300,78 @@
           y: 0,
           z: 0
         },
+
+        //objects models
+        theModels:[
+          // {
+          //   obj: '../../static/models/airplane.fbx',
+          //   map: "../../static/img/airplane01.png",
+          //   normalMap:"../../static/img/mapDefault.png",
+          //   scale: 0.05,
+          //   position: {x: -300, y: 0, z: -400},
+          //   rotation: {x: 0, y: 0, z: 0},
+          // },
+          {
+            obj: '../../static/models/wagon.glb',
+            scale: 6,
+            position: {x: -350, y: 0, z: -210},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_1/run_car.glb',
+            scale: 200,
+            position: {x: 1000, y: 30, z: -200},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_2/open_car.glb',
+            scale: 200,
+            position: {x: 1000, y: 30, z: -450},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_3/bengbeng.glb',
+            scale: 300,
+            position: {x: 700, y: 60, z: -180},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_4/classic_race_car.glb',
+            scale: 300,
+            position: {x: 850, y: 30, z: -400},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_5/jeep.glb',
+            scale: 120,
+            position: {x: 170, y: 20, z: -110},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_6/traveler.glb',
+            scale: 200,
+            position: {x: 200, y: 30, z: -650},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_7/Motorcycle.glb',
+            scale: 200,
+            position: {x: 450, y: -5, z: -300},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_8/farm_tractor.glb',
+            scale: 60,
+            position: {x: 450, y: -8, z: -650},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+          {
+            obj: '../../static/models/car_9/dump_truck.glb',
+            scale: 60,
+            position: {x: -350, y: 0, z: -550},
+            rotation: {x: 0, y: 0, z: 0},
+          },
+        ],
 
 
         //chat
@@ -462,6 +533,11 @@
           console.log(ele);
         });
 
+        //load the models
+        this.loadModels().then((list)=>{
+          console.log(list,"models")
+        });
+
         //add the video
         for (const eachVideo of this.videos) {
           this.addVideo(eachVideo.position, eachVideo.rotation, eachVideo.url, eachVideo.id);
@@ -608,34 +684,49 @@
         }
       },
 
-      //Load theObj
-      async loadMe() {
+      //Load theModels
+      async loadModels() {
         let loadingManager = this.loadingManager;
         let loaderFBX = this.promisifyLoader(new FBXLoader(loadingManager));
         let loaderOBJ = this.promisifyLoader(new OBJLoader(loadingManager));
         try {
-          let myObj = this.theObj;
-          console.log(myObj.obj);
-          let object = await loaderFBX.load(myObj.obj);
-          let texture = myObj.hasOwnProperty("map") ? new THREE.TextureLoader(loadingManager).load(myObj.map) : null;
-          object.traverse(function (child) {
-            if (child.isMesh) {
-              console.log("ccc");
-              child.castShadow = true;
-              child.receiveShadow = true;
-              child.material.shininess = 100;
-              //child.material.specular = {r: 0.8, g: 0.8, b: 0.8};
-              //child.material.color = {r: 1, g: 1, b: 1};
-              //child.material.map = texture;
+          for (let i = 0; i < this.theModels.length; i++) {
+            let myObj = this.theModels[i];
+            if (myObj.obj.toLocaleLowerCase().endsWith(".glb")) {
+              let loader = new GLTFLoader();
+              await loader.load(myObj.obj,(model)=>{
+                console.log(model,'load glb model');
+                model.scene.position.set(myObj.position.x,myObj.position.y,myObj.position.z);
+                model.scene.rotation.set(myObj.rotation.x, myObj.rotation.y, myObj.rotation.z);
+                model.scene.scale.set(myObj.scale, myObj.scale, myObj.scale);
+                this.root.add(model.scene);
+              });
+            }else {
+              let object = await loaderFBX.load(myObj.obj);
+              object.traverse(function (child) {
+                if (child.isMesh) {
+                  console.log("ccc");
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                  child.material.shininess = 100;
+                  if (myObj.hasOwnProperty("map")) {
+                    let texture = myObj.hasOwnProperty("map") ? new THREE.TextureLoader(loadingManager).load(myObj.map) : null;
+                    child.material.map = texture;
+                  }
+                  if (myObj.hasOwnProperty("normalMap")) {
+                    let normalMap = myObj.hasOwnProperty("normalMap") ? new THREE.TextureLoader(loadingManager).load(myObj.normalMap) : null;
+                    child.material.normalMap = normalMap;
+                  }
+                }
+              });
+              //调整模型比例
+              object.scale.set(myObj.scale, myObj.scale, myObj.scale);
+              object.position.set(myObj.position.x, myObj.position.y, myObj.position.z);
+              object.rotation.set(myObj.rotation.x, myObj.rotation.y, myObj.rotation.z);
+              this.root.add(object);
+              //object.name = 'myObj01';
             }
-          });
-          //调整模型比例
-          object.scale.set(myObj.scale, myObj.scale, myObj.scale);
-          object.position.set(myObj.position.x, myObj.position.y, myObj.position.z);
-          object.rotation.set(myObj.rotation.x, myObj.rotation.y, myObj.rotation.z);
-          object.name = 'myObj01';
-          this.me=object;
-          return object;
+          }
         } catch (e) {
           console.log(e);
         }
