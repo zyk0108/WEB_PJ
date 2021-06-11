@@ -428,6 +428,7 @@
             model.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
             model.scene.scale.set(obj.scale, obj.scale, obj.scale);
             model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+            this.addTheName(userId,model.scene);
             this.playerMap.set(userId,model.scene);
             this.webglScene.add(model.scene);
           });
@@ -741,6 +742,7 @@
             model.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
             model.scene.scale.set(obj.scale, obj.scale, obj.scale);
             model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+            this.addTheName(this.userName,model.scene);
             this.root.add(model.scene);
             this.me = model.scene;
           });
@@ -748,6 +750,31 @@
         } catch (e) {
           console.log(e);
         }
+      },
+
+      addTheName(name,scene){
+        //先用画布将文字画出
+        let canvas = document.createElement("canvas");
+        canvas.width = 120;
+        canvas.height = 35;
+        let ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffff00";
+        ctx.font = "Bold 20px Verdana";
+        ctx.lineWidth = 4;
+        ctx.fillText(name,0,25);
+        let texture = new THREE.Texture(canvas);
+        texture.needsUpdate = true;
+
+        //使用Sprite显示文字
+        let spriteMaterial = new THREE.SpriteMaterial({
+          //color:0xff00ff,//设置精灵矩形区域颜色
+          map: texture,//设置精灵纹理贴图
+        });
+        let sprite = new THREE.Sprite(spriteMaterial);
+        // 控制精灵大小，比如可视化中精灵大小表征数据大小
+        sprite.scale.set(1, 1, 1); // 只需要设置x、y两个分量就可以
+        scene.add(sprite);
+        sprite.translateY(5);
       },
 
       //Utils: load function
@@ -1180,6 +1207,7 @@
                       model.scene.position.set(x,y,z);
                       model.scene.rotation.set(rx, ry, rz);
                       model.scene.scale.set(obj.scale, obj.scale, obj.scale);
+                      this.addTheName(userId,model.scene);
                       this.playerMap.set(userId,model.scene);
                       this.webglScene.add(model.scene);
                     });
