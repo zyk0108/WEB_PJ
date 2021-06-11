@@ -1,6 +1,94 @@
 <template>
   <div>
-    <ChatRoom ref="chatRoom"></ChatRoom>
+    <el-dialog title="THE CHAT DIALOG" :visible.sync="dialogFormVisible" style="opacity: 1">
+      <el-row type="flex" justify="center">
+        <el-col :md="24">
+          <!--头部-->
+          <el-card :body-style="{ padding: '10px' }" style="background-color: #E8E8E8; border: 1px solid #DDDDDD; border-bottom: 0;">
+            <div>{{dialogName}}</div>
+          </el-card>
+
+          <!--body-->
+          <el-card :body-style="{ padding: '0' }" style="border: 1px solid #DDDDDD; border-top: 0;">
+            <el-row>
+              <!--左边用户栏-->
+              <el-col :md="6" style=" height: 400px; border-right: 2px solid #DDDDDD; overflow: auto;">
+                <div v-for="(item, index) in listName" :key="index" style="padding:2px 5px">
+                  <a href="javascript:void(0);" @click="toggleChat(item)">
+                    <el-card shadow="never" id="userItem">
+                      <el-row >
+                        <el-col :span="7">
+                          <el-avatar v-if="item === 'Group'" shape="square" icon="el-icon-user-solid"></el-avatar>
+                          <el-avatar v-else icon="el-icon-user-solid"></el-avatar>
+                        </el-col>
+                        <el-col :span="17">
+                          <div style="text-align: center;line-height: 40px">
+                            {{item}}
+                          </div>
+                        </el-col>
+                      </el-row>
+                    </el-card>
+                  </a>
+                </div>
+
+              </el-col>
+              <!--发消息的主体-->
+              <el-col :md="18" style=" height: 400px; border-right: 2px solid #DDDDDD; overflow: auto;" id="chatBody">
+                <el-card :body-style="{ padding: '5px' }" shadow="never">
+                  <div v-for="(item,index) in this.data" :key="index" :id="item.message">
+
+                    <!--case1：系统消息-->
+                    <p v-if="item.type===0" style="background-color: #f3f3f3;width: 50%;margin-left: 25%;border-radius: 5px">{{item.message}}</p>
+
+                    <!--case2：其他用户消息-->
+                    <div v-if="item.type===1" style="margin-bottom: 15px">
+                      <el-row style="width: 20%">
+                        <el-col :span="7">
+                          <el-avatar style="width: 20px; height: 20px;" shape="square" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
+                        </el-col>
+                        <el-col :span="17">
+                          <div style="text-align: center;line-height: 1">
+                            {{item.name}}
+                          </div>
+                        </el-col>
+                      </el-row>
+                      <div style="background-color: #b4bccc;width: 70%;border-radius: 5px;text-align: left;padding: 5px">{{item.message}}</div>
+                    </div>
+
+                    <!--case3：本人发送的消息-->
+                    <div v-if="item.type===2" style="margin-bottom: 15px">
+                      <el-row style="width: 20%;margin-left: 80%">
+                        <el-col :span="17">
+                          <div style="text-align: center;line-height: 1">
+                            {{item.name}}
+                          </div>
+                        </el-col>
+                        <el-col :span="7">
+                          <el-avatar style="width: 20px; height: 20px;" shape="square" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
+                        </el-col>
+                      </el-row>
+
+                      <div style="background-color: #9FE86C;width: 70%;border-radius: 5px;margin-left: 29%;text-align: left; padding: 5px">{{item.message}}</div>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+            <el-card :body-style="{'padding-top': '11px', 'padding-bottom': '12px', 'padding-left': '10px', 'padding-right': '12px' }" shadow="never">
+              <div style="text-align: right">
+                <el-input
+                  size="mini"
+                  style="width:67%"
+                  placeholder="please input here"
+                  v-model="input">
+                </el-input>
+                <el-button type="primary" size="mini" @click="webSocketSend()">Send</el-button>
+              </div>
+            </el-card>
+          </el-card>
+        </el-col>
+      </el-row>
+    </el-dialog>
     <section id="loading-screen">
       <div id="loader"></div>
       <h1 class="begin-text">Wait a moment, loading models will take some time...</h1>
@@ -23,13 +111,11 @@
   import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader'
   import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
   import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
-  import ChatRoom from './Chat'
   import JWT from 'jwt-decode'
   export default {
     name: "ThreeMapDemo",
     data(){
       return{
-        theName: JWT(this.$store.state.token).sub,
         camera: null,
         webglScene: null,
         renderer: null,
@@ -195,7 +281,7 @@
         ],
 
         //me
-        myObj: {
+        theObj: {
           obj: '../../static/models/robot.glb',
           map: "../../static/models/mapDefault.png",
           scale: 4,
@@ -203,17 +289,6 @@
           rotation: {x: 0, y: 380, z: 0},
         },
         me:[],
-
-        //Other users
-        otherUsers:[
-          // {
-          //   username: '',
-          //   obj: '../../static/models/robot.glb',
-          //   scale: 4,
-          //   position: {x: -200, y: -4, z: -140},
-          //   rotation: {x: 0, y: 380, z: 0},
-          // }
-        ],
 
         playerMap:null,
 
@@ -226,64 +301,67 @@
           y: 0,
           z: 0
         },
+
+
+        //chat
+        dialogFormVisible: false,
+        dialogName: "Group",
+        groupName: "Group",
+        input: '',
+        infoList: [], //[0]为群聊信息的存储
+        webSocket : null,
+        userName: '',
+        toUser: '',
+        data: [],
+
+        //用户名列表
+        listName:[],
+
+        //上下线的人
+        changeUser: null,
+
+        //场景
+        scene: 'museum'
       }
     },
-    components:{
-      //把子组件关联到对象中
-      ChatRoom
-    },
     mounted() {
+      //chat
+      let token = this.$store.state.token;
+      if(token==null){
+        console.log("Token is null");
+        this.$router.replace({path: '/Login'})
+      }else {
+        console.log("Init the websocket...");
+        this.userName=JWT(token).sub;
+        let scene = this.scene;
+        this.webSocket = new WebSocket('ws://localhost:8080/game/scene=' + scene + '/token=' + token);
+        this.initWebSocket();
+      }
+
+      //群聊
+      this.listName.push(this.groupName);
+      this.infoList.push({name:this.groupName, data:[]});  //data=[{type,name,data}]
+      //自聊
+      this.listName.push(this.userName);
+      this.infoList.push({name:this.userName, data:[]});
+
+      //3D scene
       this.playerMap = new Map();
       this.createScene(document.getElementById("theCanvas"));
       this.animate();
     },
     methods: {
-      //其他人的位置更新
-      updateOtherUsersPosition(userId,position){
-        if (this.playerMap.has(userId)) {
-          let model = this.playerMap.get(userId);
-          console.log(new THREE.Vector3(position)+"zzzzzzzzzzzzz");
-          model.position.set(position);
-          //model.rotation.set(data.rotation._x, data.rotation._y + Math.PI / 2, data.rotation._z);
-        }
-      },
-
-      //自己上线加载其他所有用户的数据
-      addAllUser(allOtherUsersPosition){
-        for (let i = 0; i < allOtherUsersPosition.length; i++) {
-          this.otherUsers.push({
-            username: allOtherUsersPosition[i].id,
-            obj: '../../static/models/robot.glb',
-            scale: 4,
-            position: {x: allOtherUsersPosition[i].x, y: allOtherUsersPosition[i].y, z: allOtherUsersPosition[i].z},
-            rotation: {x: 0, y: 380, z: 0},
-          });
-        }
-        this.otherUserNum = this.otherUsers.length;
-        this.loadOtherUsers();
-      },
-
       //其他人上线
       addUser(userId){
-        this.otherUsers.push({
-          username: userId,
-          obj: '../../static/models/robot.glb',
-          scale: 4,
-          position: {x: -300, y: 0, z: -100},
-          rotation: {x: 0, y: 380, z: 0},
-        });
-        this.otherUserNum += 1;
-
-        let obj = this.otherUsers[this.otherUsers.length-1];
+        let obj = this.theObj;
         let loader = new GLTFLoader();
         try {
           loader.load(obj.obj,(model)=>{
             console.log(model,'load online');
-            console.log(obj.username,"vvvvvvvvvvvvvvvvvvvvvv");
-            this.playerMap.set(obj.username,model.scene);
             model.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
             model.scene.scale.set(obj.scale, obj.scale, obj.scale);
             model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+            this.playerMap.set(userId,model.scene);
             this.webglScene.add(model.scene);
           });
         }catch (e) {
@@ -293,22 +371,14 @@
 
       //其他人下线
       deleteUser(userId){
-        for (let i = 0; i < this.otherUsers.length; i++) {
-          if (this.otherUsers[i].username === userId) {
-            this.otherUsers.splice(i, 1);
-            break;
-          }
-        }
-        this.otherUserNum = this.otherUsers.length;
         if (this.playerMap.has(userId)) {
-          this.root.remove(this.playerMap.get(userId));
+          this.webglScene.remove(this.playerMap.get(userId));
           this.playerMap.delete(userId);
         }
       },
 
       /********************************Create webglScene*********************************/
       createScene(canvas) {
-        //Create the variables for velocity and direction
         this.velocity = new THREE.Vector3();
         this.direction = new THREE.Vector3();
 
@@ -324,17 +394,10 @@
 
         //新建相机
         let camera= new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-        //????不起作用
-        /*camera.lookAt({//相机看向哪个坐标
-          x : -310,
-          y : 10,
-          z : -100
-        });*/
         camera.lookAt( new THREE.Vector3( 200, 10, -100 ) );
         this.camera = camera;
-        // /*console.log(camera.position)
         // //躺着拍&竖着拍&...
-        // this.camera.up = new THREE.Vector3( 0, 1, 0 );*/
+        // this.camera.up = new THREE.Vector3( 0, 1, 0 );
         //新建场景
         this.webglScene = new THREE.Scene();
         this.webglScene.background = new THREE.Color(0x000000);
@@ -398,35 +461,11 @@
           this.cloneWalls(eachWall.size, eachWall.position, eachWall.rotation, this.root);
         }
 
-        // The test example
-        // let box=new THREE.SphereGeometry(3, 100, 100);//经纬度细分数40,40
-        // let material=new THREE.MeshBasicMaterial({color:0x403f3f});//材质对象
-        // let mesh=new THREE.Mesh(box,material);//网格模型对象
-        // //mesh.position.set(-300,8,-105);
-        // this.root.add(mesh);//网格模型添加到场景中
-        // //this.me = mesh;
-
-        //Load me
-        // this.loadMe().then(ele=>{
-        //   this.root.add(ele);
-        // });
-        this.initModelOfMe().then(ele=>{
+        //load myself
+        this.initModelOfMe().then((ele)=>{
           console.log(ele);
         });
 
-        //Load otherUsers
-        // this.loadUsers().then(theList=>{
-        //   for (let i = 0; i < theList.length; i++) {
-        //     this.root.add(theList[i]);
-        //   }
-        // });
-        // this.loadOtherUsers().then(theList=>{
-        //   for (let i = 0; i < theList.length; i++) {
-        //     console.log('Other user: ', i);
-        //   }
-        // });
-
-        //this.myObj.position.x = -100
         //add the video
         for (const eachVideo of this.videos) {
           this.addVideo(eachVideo.position, eachVideo.rotation, eachVideo.url, eachVideo.id);
@@ -444,8 +483,6 @@
         this.initPointerLock();
 
         this.webglScene.add(this.root);
-        let controls = new PointerLockControls(this.camera, document.body);
-        console.log(this.controls.isLocked+"lll")
         if (!this.controls.isLocked) {
           document.addEventListener('keydown', this.onKeyDown, false);
           document.addEventListener('keyup', this.onKeyUp, false);
@@ -575,13 +612,13 @@
         }
       },
 
-      //Load myObj
+      //Load theObj
       async loadMe() {
         let loadingManager = this.loadingManager;
         let loaderFBX = this.promisifyLoader(new FBXLoader(loadingManager));
         let loaderOBJ = this.promisifyLoader(new OBJLoader(loadingManager));
         try {
-          let myObj = this.myObj;
+          let myObj = this.theObj;
           console.log(myObj.obj);
           let object = await loaderFBX.load(myObj.obj);
           let texture = myObj.hasOwnProperty("map") ? new THREE.TextureLoader(loadingManager).load(myObj.map) : null;
@@ -609,7 +646,7 @@
       },
 
       async initModelOfMe() {
-        let obj = this.myObj;
+        let obj = this.theObj;
         let loader = new GLTFLoader();
         try {
           await loader.load(obj.obj,(model)=>{
@@ -651,15 +688,20 @@
         let controls = new PointerLockControls(this.camera, document.body);
         this.controls = controls;//undefined?????
 
+        console.log(this.controls);
         this.controls.addEventListener('lock', function () {
           theBlocker.style.display = 'none';
           theInstruction.style.display = 'none';
+          /*this.controls.getObject().position.x = this.$store.state.position.x;
+          this.controls.getObject().position.y = this.$store.state.position.y;
+          this.controls.getObject().position.z = this.$store.state.position.z;*/
         });
 
         this.controls.addEventListener('unlock', function () {
           theBlocker.style.display = 'block';
           theInstruction.style.display = '';
-          console.log(this.myPosition,"iiiiiiiiiiiiiiiiiiiiii");
+          /*this.$store.commit('setPosition', this.controls.getObject().position);
+          console.log(this.myPosition,"iiiiiiiiiiiiiiiiiiiiii",this.controls.getObject().position);*/
         });
 
         console.log("test xxx");
@@ -730,7 +772,7 @@
           case 84://t
             this.controls.unlock();
             console.log("uuu");
-            this.$refs.chatRoom.showDialogForm();//弹出聊天室
+            this.showDialogForm();//弹出聊天室
             break;
         }
 
@@ -796,113 +838,14 @@
         };
       },
 
-      //Loading other users
-      async loadUsers(){
-        let loadingManager = this.loadingManager;
-        let loaderFBX = this.promisifyLoader(new FBXLoader(loadingManager));
-        let userList=[];
-        try {
-          for (let i = 0; i < this.otherUsers.length; i++) {
-            let myObj = this.otherUsers[i];
-            console.log(myObj.obj);
-            let object = await loaderFBX.load(myObj.obj);
-            object.traverse(function (child) {
-              if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-                child.material.shininess = 100;
-              }
-            });
-            //调整模型比例
-            object.scale.set(myObj.scale, myObj.scale, myObj.scale);
-            object.position.set(myObj.position.x, myObj.position.y, myObj.position.z);
-            object.rotation.set(myObj.rotation.x, myObj.rotation.y, myObj.rotation.z);
-            object.name = 'User'+i;
-            userList.push(object)
-          }
-          return userList;
-        } catch (e) {
-          console.log(e);
-        }
-      },
-
-      //加载其他用户
-      loadOtherUsers() {
-        let userList=[];
-        let loader = new GLTFLoader();
-        try {
-          for (let i = 0; i < this.otherUsers.length; i++) {
-            let obj = this.otherUsers[i];
-            loader.load(obj.obj,(gltf)=>{
-              console.log(gltf,'other users load hhh');
-              this.playerMap.set(obj.username,gltf.scene);
-              gltf.scene.position.set(obj.position.x,obj.position.y,obj.position.z);
-              gltf.scene.scale.set(obj.scale, obj.scale, obj.scale);
-              gltf.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
-              this.webglScene.add(gltf.scene);
-              userList.push(gltf.scene);
-            });
-          }
-          return userList;
-        } catch (e) {
-          console.log(e);
-        }
-      },
-
       /**********************************run the 3D scene************************************/
       animate() {
         requestAnimationFrame(this.animate);
-
-        //控制其他的用户的上下线
-        let userNum = this.$refs.chatRoom.listName.length-2;
-        console.log(userNum,"lllllllzyk");
-        if (userNum !== this.otherUserNum) {
-          console.log("oooooooooooooooooooooooooooooooooooooooooo");
-          if (userNum > this.otherUserNum) {
-            if (this.$refs.chatRoom.changeUser === null) {
-              //初始化其他用户数据
-              let theUserArr = this.$refs.chatRoom.allOtherUsersPosition;
-              this.addAllUser(theUserArr);
-              console.log(this.otherUserNum,"iiiccccc");
-            }else {
-              this.addUser(this.$refs.chatRoom.changeUser);
-            }
-
-          }else {
-            this.deleteUser(this.$refs.chatRoom.changeUser);
-          }
-        }
-        //console.log(userNum,"kkkooo");
-
-
-        //控制其他用户的坐标移动
-        let thePosition = this.$refs.chatRoom.thePosition;
-        let len = thePosition.length;
-        for (let i = 0; i < len; i++) {
-          let id = thePosition[0].userId;
-          let position = {x:thePosition[0].x,y:thePosition[0].y,z:thePosition[0].z};
-          console.log(this.playerMap,"nnnnnnnnnn",id);
-          if (this.playerMap.has(id)) {
-            let model = this.playerMap.get(id);
-            console.log(position);
-            model.position = new THREE.Vector3(position);
-            //model.position.set(position);
-            console.log("in aaaaaaaaaaaaaaaaaaaaaa");
-            console.log(this.me.position);
-            console.log(this.controls.getObject().position);
-            console.log(thePosition);
-            this.$refs.chatRoom.thePosition.splice(0,1);
-            console.log(this.$refs.chatRoom.thePosition,"after");
-          }
-          //this.updateOtherUsersPosition(id,position);
-          //this.$refs.chatRoom.thePosition.splice(0,1);
-        }
-        //console.log(thePosition);
-
         if (this.controls.isLocked) {
+
           let time = performance.now();
           let delta = (time - this.prevTime) / 1000;
-
+          //console.log(delta,"[[[[[[[[[[[[[[[[[");
           // load for the videos
           this.videoObj.forEach(element => {
             if (element[0].readyState === element[0].HAVE_ENOUGH_DATA) { //element[0]:video
@@ -990,16 +933,16 @@
           //console.log(a,b,c)
           //调用接口发送更新的数据
 
-          this.me.position = new THREE.Vector3(a,b,c);
+          this.me.position.set(a,b,c);
 
           //发送自己的坐标
           this.judgePosition(a,b,c);
 
-          console.log(a,b,c);
+          //console.log(a,b,c,"eke");
           //相机上下
           let height = this.velocity.y * delta;
           let srcHeight = this.controls.getObject().position.y;
-          this.controls.getObject().position = new THREE.Vector3(a, srcHeight+height, c);
+          this.controls.getObject().position.set(a, srcHeight+height, c);
 
           if (this.controls.getObject().position.y < 10) {
             this.controls.getObject().position.y = 10;
@@ -1017,7 +960,7 @@
         let srcZ = this.myPosition.z;
         if (x !== srcX || y !== srcY || srcZ !== z) {
           this.setMyPosition(x,y,z);
-          this.$refs.chatRoom.webSocketSend(this.theName,x,y,z);
+          this.webSocketSend(this.userName,x,y,z);
         }
       },
 
@@ -1028,12 +971,265 @@
       },
 
       clickTheScene(){
-        console.log(this.controls);
         this.controls.lock();
-        console.log(this.myPosition);
-        console.log(this.controls.getObject().position);
-        console.log("test kkk")
-      }
+        this.prevTime = performance.now();
+      },
+
+      /****************************Chat****************************************************/
+      showDialogForm(){
+        this.dialogFormVisible = true;
+      },
+
+      initWebSocket() {
+        this.webSocket.onerror = this.onError;  // 通讯异常
+        this.webSocket.onopen = this.onOpen;  // 连接成功
+        this.webSocket.onmessage = this.onMessage;  // 收到消息时回调
+        this.webSocket.onclose = this.onClose;  // 连接关闭时回调
+      },
+      onError() {
+        console.log("websocket error...")
+      },
+      onOpen() {
+        console.log("websocket start...");
+      },
+      onMessage(event) {
+        console.log("Get the message from the backend");
+        let recv_data = JSON.parse(event.data);
+        console.log("message after parse:", recv_data);
+        //recv_data={isSystem: true, type: "online", fromUsername: "System", content: "admin123"}
+
+        //add the receive data to the content
+        let isSystem = recv_data.isSystem;
+        let type = recv_data.type;
+        let fromUsername = recv_data.fromUsername;
+        let content = recv_data.content;
+
+        if (isSystem === true) {//系统消息：除去私聊信息以外
+          //this.dialogName = this.groupName;
+          if (type === 'online' || type === 'offline') {
+            //群聊上线、下线群广播
+            if (type === 'online') {
+              //上线
+              console.log(this.listName);
+              if (this.listName.indexOf(content) === -1) {
+                this.listName.push(content);
+                let flag = false;
+                for (let i = 0; i < this.infoList.length; i++) {
+                  if (this.infoList[i].name === content) {
+                    flag = true;
+                    break;
+                  }
+                }
+                if (!flag) {
+                  this.infoList.push({name: content, data: []});
+                }
+                //add
+                this.addUser(content);
+
+                content = content + ' is ' + type;
+              }else{
+                //add
+                this.addUser(content);
+
+                content = content + ' is ' + type + ' again!';
+              }
+            }else{
+              //下线
+              console.log(content);
+              console.log('before offline:',this.listName);
+              let index = this.listName.indexOf(content);
+              if (index > -1) {
+                this.listName.splice(index,1);
+                console.log(index);
+              }
+
+              //delete
+              this.deleteUser(content);
+
+              console.log('after offline:',this.listName);
+              content = content + ' is ' + type +'!';
+            }
+            //this.data = this.infoList[0].data;
+            this.addMessage(this.infoList[0].data, 0, 'system', content);
+            //console.log(this.data);
+            //滚动到底部
+            this.scroll();
+          }else if (type === 'chat') {
+            //群聊：信息广播
+            //this.data = this.infoList[0].data;
+            this.addMessage(this.infoList[0].data, 1, fromUsername, content);
+            //滚动到底部
+            this.scroll();
+          }else{
+            // type = coordinate : 处理坐标
+            if (fromUsername === 'system') {
+              //加入场景的时候返回所有的用户信息
+              let resObj = null, userId;
+              let x,y,z;
+              for (let i = 0; i < content.length; i++) {
+                resObj = JSON.parse(content[i]);
+                userId = resObj.userID;
+                x = resObj.x;
+                y = resObj.y;
+                z = resObj.z;
+                if ( userId !== this.userName ) {
+                  this.listName.push(userId);
+                  this.infoList.push({name: userId, data: []});
+                  //各个用户的坐标的加入scene
+                  let obj = this.theObj;
+                  let loader = new GLTFLoader();
+                  try {
+                    loader.load(obj.obj,(model)=>{
+                      console.log(model,'load online');
+                      model.scene.position.set(x,y,z);
+                      model.scene.scale.set(obj.scale, obj.scale, obj.scale);
+                      model.scene.rotation.set(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+                      this.playerMap.set(userId,model.scene);
+                      this.webglScene.add(model.scene);
+                    });
+                  }catch (e) {
+                    console.log(e);
+                  }
+                }
+              }
+            }else{
+              //对特定的用户userId进行坐标的更新
+              let userId = content.username;
+              let x = content.x;
+              let y = content.y;
+              let z = content.z;
+              if (this.playerMap.has(userId)) {
+                let model = this.playerMap.get(userId);
+                model.position.set(x,y,z);
+                //model.rotation.set(data.rotation._x, data.rotation._y + Math.PI / 2, data.rotation._z);
+              }
+            }
+          }
+        }else{
+          //私聊：聊天消息
+          if (fromUsername === this.userName) {
+            //add nothing
+            //this.dialogName = this.userName + ' [ME]';
+          }else {
+            //this.dialogName = this.groupName+'('+fromUsername+')';
+            let flag = false;
+            let addData=[];
+            for (let i = 0; i < this.infoList.length; i++) {
+              if (this.infoList[i].name === fromUsername) {
+                flag = true;
+                addData = this.infoList[i].data;
+                break;
+              }
+            }
+            if (flag) {
+              this.addMessage(addData, 1, fromUsername, content);
+              //滚动到底部
+              this.scroll();
+            }else {
+              this.listName.push(fromUsername);
+              this.infoList.push({name: fromUsername, data:[{type:1, name:fromUsername, message: content}]});
+            }
+          }
+        }
+      },
+      onClose() {
+        console.log("websocket close ...");
+      },
+
+      webSocketSend(username, x, y, z) {
+        //发送消息
+        let len = arguments.length;
+        if (len === 0) {//判断是否为发送信息
+          let message = this.input;
+          if (message === '') {
+            this.$message.error('Input can not be empty!');
+          }else {
+            if (this.dialogName === this.groupName) {
+              //群发消息
+              let send_data = {isSystem: true, type: "chat", toUsername: 'system', content: message};
+              send_data = JSON.stringify(send_data);
+              this.webSocket.send(send_data);
+              this.input = '';
+              this.data = this.infoList[0].data;
+              this.addMessage(this.data, 2, this.userName, message);
+              //设置滚动条
+              this.scroll();
+            }else {
+              //私聊
+              let send_data = {isSystem: false, type: "chat", toUsername: this.toUser, content: message};
+              send_data = JSON.stringify(send_data);
+              this.webSocket.send(send_data);
+              this.input = '';
+              this.addMessage(this.data, 2, this.userName, message);
+              //设置滚动条
+              this.scroll();
+            }
+          }
+        }else{//发送：更新坐标
+          let content = {
+            username: username,
+            x: x,
+            y: y,
+            z: z
+          };
+          let send_data = {isSystem: true, type: "coordinate", toUsername: 'not_used', content: content};
+          send_data = JSON.stringify(send_data);
+          this.webSocket.send(send_data);
+        }
+      },
+      webSocketClose() {//关闭连接
+        this.webSocket.close();
+        this.$router.replace({path:'/'});
+      },
+
+      addMessage(data, type, name, message) {
+        data.push({type:type, name:name, message:message});
+      },
+
+      toggleChat(toUser) {
+        this.toUser = toUser;
+        console.log(this.toUser);
+        //改变群名:群聊、私聊
+        if (toUser === this.groupName) {
+          //群聊
+          this.dialogName = this.groupName;
+          this.data = this.infoList[0].data;
+          //设置滚动条
+          this.scroll();
+        }else {
+          //私聊
+          if (this.userName === toUser) {
+            this.dialogName = toUser + ' [ME]';
+          }else {
+            this.dialogName = this.groupName+'('+toUser+')';
+          }
+
+          let flag = false;
+          for (let i = 0; i < this.infoList.length; i++) {
+            if (toUser === this.infoList[i].name) {
+              this.data = this.infoList[i].data;
+              flag = true;
+              break;
+            }
+          }
+          if (!flag) {
+            this.data = [];
+          }
+          //设置滚动条
+          this.scroll();
+        }
+      },
+
+      //滚动到最底
+      scroll(){
+        //nextTick在DOM完成后在执行
+        this.$nextTick(() => {
+          let element = document.getElementById('chatBody');  // 获取对象
+          if (element != null) {
+            element.scrollTop = element.scrollHeight;  // 滚动高度
+          }
+        })
+      },
     }
   }
 </script>
@@ -1177,6 +1373,23 @@
 
 </style>
 <style>
+  .limitTitleDirectory {
+    width: 120px;		/* 限制文本宽度 */
+    overflow: hidden;		/* 超出的文本隐藏 */
+    text-overflow: ellipsis;	/* 溢出的文本内容用 ... 代替 */
+    white-space: nowrap;		/* 溢出不换行*/
+  }
+
+  .el-menu-item {
+    font-size: 14px;
+    color: #303133;
+    cursor: pointer;
+    -webkit-transition: border-color .3s,background-color .3s,color .3s;
+    transition: border-color .3s,background-color .3s,color .3s;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
   /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
   ::-webkit-scrollbar
   {
@@ -1198,5 +1411,17 @@
     border-radius: 10px;  /*滚动条的圆角*/
     /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
     background-color: #b8b8bc;  /*滚动条的背景颜色*/
+  }
+  .el-dialog__body {
+    padding: 0px 20px 10px 20px;
+    color: #606266;
+    font-size: 14px;
+    word-break: break-all;
+  }
+  .el-card__body{
+    padding: 2px 0 0 0;
+  }
+  #userItem:hover{
+    background: #b4bccc;
   }
 </style>
