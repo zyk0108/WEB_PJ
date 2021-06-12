@@ -5,7 +5,7 @@ import Login from '@/components/Login'
 import Register from '@/components/Register'
 import Home from '@/components/Home'
 import ThreeDemo from '@/components/ThreeDemo'
-import ThreeMapDemo from '../components/ThreeMapDemo'
+import CarExhibitionHall from '../components/CarExhibitionHall'
 import Chat from '../components/Chat'
 import First from '../components/First'
 
@@ -46,9 +46,9 @@ export default new Router({
       component: ThreeDemo
     },
     {
-      path: '/ThreeMapDemo',
-      name: 'ThreeMapDemo',
-      component: ThreeMapDemo
+      path: '/CarExhibitionHall',
+      name: 'CarExhibitionHall',
+      component: CarExhibitionHall
     },
     {
       path: '/Chat',

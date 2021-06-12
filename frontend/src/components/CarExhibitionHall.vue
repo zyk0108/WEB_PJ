@@ -109,13 +109,12 @@
   import * as THREE from "three"
   import {PointerLockControls} from 'three/examples/jsm/controls/PointerLockControls'
   import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader'
-  import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
   import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
   import JWT from 'jwt-decode'
   import * as ModelsData from '../../static/data/ModelsData'
   import * as WallsData from '../../static/data/CarHallData'
   export default {
-    name: "ThreeMapDemo",
+    name: "CarExhibitionHall",
     data(){
       return{
         camera: null,

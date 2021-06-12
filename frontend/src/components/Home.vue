@@ -56,9 +56,9 @@
           to explore your journey.
         </div>
         <div>
-          <router-link to="ThreeMapDemo">
+          <router-link to="CarExhibitionHall">
             <el-button type="primary"
-                       style="margin:10px auto 0px auto;width: 100%;background: #5299db;line-height: 0.8">Three Demo</el-button>
+                       style="margin:10px auto 0px auto;width: 100%;background: #5299db;line-height: 0.8">Cars 3D Exhibition Hall</el-button>
           </router-link>
         </div>
       </el-card>
