@@ -112,6 +112,8 @@
   import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
   import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
   import JWT from 'jwt-decode'
+  import * as ModelsData from '../../static/data/ModelsData'
+  import * as WallsData from '../../static/data/CarHallData'
   export default {
     name: "ThreeMapDemo",
     data(){
@@ -155,110 +157,10 @@
         composer: null,
 
         //walls array
-        walls:[
-          {
-            size: {h: 370, w: 1200, d: 20},//d：墙面的厚度 w：墙面的宽度（墙有多长）h:墙的高度（从上到下）
-            rotation: {x: 0, y: 0, z: 0},
-            position: {x: 600, y: 180, z: 50},//x:x轴的初始位置 y:y轴起始位置 z:z轴初始位置
-          },
-          // {
-          //   size: {h: 370, w: 830, d: 20},//最左边墙
-          //   rotation: {x: 0, y: 300 + 0.02, z: 0},
-          //   position: {x: 50, y: 180, z: -350},
-          // },
-          //左边的墙
-          {
-            size: {h: 370, w: 460, d: 20},//左边墙门右边部分
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 11, y: 180, z: -190},
-          },
-          {
-            size: {h: 250, w: 150, d: 20},//左边墙门
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 11, y: 240, z: -495},
-          },
-          {
-            size: {h: 370, w: 180, d: 20},//左边墙门左边部分
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 11, y: 180, z: -660},
-          },
-          // 中间隔墙
-          {
-            size: {h: 370, w: 40, d: 20},//中间门右边部分
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 350, y: 180, z: 20},
-          },
-          {
-            size: {h: 250, w: 150, d: 20},//中间分隔门
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 350, y: 240, z: -75},
-          },
-          {
-            size: {h: 370, w: 600, d: 20},//中间门左边部分
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 350, y: 180, z: -450},
-          },
-          {
-            size: {h: 370, w: 1200, d: 20},//最前面的墙
-            rotation: {x: 0, y: 0, z: 0},
-            position: {x: 600, y: 180, z: -750},
-          },
-          {
-            size: {h: 370, w: 830, d: 20},//最右边的墙
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: 1200, y: 180, z: -350},
-          },
-          //围栏
-          {
-            size: {h: 80, w: 830, d: 20},//最左边的围栏
-            rotation: {x: 0, y: 300 + 0.02, z: 0},
-            position: {x: -460, y: 20, z: -350},
-          },
-          {
-            size: {h: 80, w: 460, d: 20},//最前面的围栏
-            rotation: {x: 0, y: 0, z: 0},
-            position: {x: -230, y: 20, z: -750},
-          },
-          {
-            size: {h: 80, w: 460, d: 20},//最后面的围栏
-            rotation: {x: 0, y: 0, z: 0},
-            position: {x: -230, y: 20, z: 50},
-          },
-        ],
+        walls: WallsData.carHallWalls,
 
         //texts array
-        text : [
-          {
-            message: 'P : play/resume | SPACE : pause | R : replay',//门墙视频提示
-            position: {x: 1, y: 40, z: -270},
-            rotation: {x: 0, y: -Math.PI / 2, z: 0},
-            propertiesFont: {size: 7, height: 1},
-          },
-          {
-            message: 'Tne Star Wars Video Instruction',//门墙视频标题
-            position: {x: 1, y: 230, z: -230},
-            rotation: {x: 0, y: -Math.PI / 2, z: 0},
-            propertiesFont: {size: 7, height: 1},
-          },
-          {
-            message: 'Car models Exhibition Hall',//展厅标题
-            position: {x: 1, y: 180, z: -630},
-            rotation: {x: 0, y: -Math.PI / 2, z: 0},
-            propertiesFont: {size: 15, height: 1},
-          },
-          {
-            message: 'Entrance Door',//展厅门标语
-            position: {x: 1, y: 145, z: -525},
-            rotation: {x: 0, y: -Math.PI / 2, z: 0},
-            propertiesFont: {size: 7, height: 1},
-          },
-          {
-            message: 'Inside Door',//内部门标语
-            position: {x: 340, y: 145, z: -105},
-            rotation: {x: 0, y: -Math.PI / 2, z: 0},
-            propertiesFont: {size: 7, height: 1},
-          }
-        ],
+        text : WallsData.carHallText,
 
         //videos array
         videos : [
@@ -276,7 +178,7 @@
           {
             texture: '../../static/info/Test_Door.PNG',
             rotation: {x: -0.7, y: 0, z: 0},//x:牌面倾斜度 z:旋转的角度，正数为顺时针转
-            position: {x: -280, y: 10, z: -495},
+            position: {x: -60, y: 10, z: -525},
           },
         ],
 
@@ -302,76 +204,7 @@
         },
 
         //objects models
-        theModels:[
-          // {
-          //   obj: '../../static/models/airplane.fbx',
-          //   map: "../../static/img/airplane01.png",
-          //   normalMap:"../../static/img/mapDefault.png",
-          //   scale: 0.05,
-          //   position: {x: -300, y: 0, z: -400},
-          //   rotation: {x: 0, y: 0, z: 0},
-          // },
-          {
-            obj: '../../static/models/wagon.glb',
-            scale: 6,
-            position: {x: -350, y: 0, z: -210},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_1/run_car.glb',
-            scale: 200,
-            position: {x: 1000, y: 30, z: -200},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_2/open_car.glb',
-            scale: 200,
-            position: {x: 1000, y: 30, z: -450},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_3/bengbeng.glb',
-            scale: 300,
-            position: {x: 700, y: 60, z: -180},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_4/classic_race_car.glb',
-            scale: 300,
-            position: {x: 850, y: 30, z: -400},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_5/jeep.glb',
-            scale: 120,
-            position: {x: 170, y: 20, z: -110},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_6/traveler.glb',
-            scale: 200,
-            position: {x: 200, y: 30, z: -650},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_7/Motorcycle.glb',
-            scale: 200,
-            position: {x: 450, y: -5, z: -300},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_8/farm_tractor.glb',
-            scale: 60,
-            position: {x: 450, y: -8, z: -650},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-          {
-            obj: '../../static/models/car_9/dump_truck.glb',
-            scale: 60,
-            position: {x: -350, y: 0, z: -550},
-            rotation: {x: 0, y: 0, z: 0},
-          },
-        ],
+        theModels: ModelsData.carModels,
 
 
         //chat
@@ -689,7 +522,6 @@
       async loadModels() {
         let loadingManager = this.loadingManager;
         let loaderFBX = this.promisifyLoader(new FBXLoader(loadingManager));
-        let loaderOBJ = this.promisifyLoader(new OBJLoader(loadingManager));
         try {
           for (let i = 0; i < this.theModels.length; i++) {
             let myObj = this.theModels[i];
@@ -702,6 +534,10 @@
                 model.scene.scale.set(myObj.scale, myObj.scale, myObj.scale);
                 this.root.add(model.scene);
               });
+
+              //加载intro信息
+              let modelIntro = this.theModels[i].info;
+              this.createInformation(modelIntro.content,this.sizeInfo,modelIntro.position,modelIntro.rotation_info,this.root);
             }else {
               let object = await loaderFBX.load(myObj.obj);
               object.traverse(function (child) {
@@ -711,12 +547,10 @@
                   child.receiveShadow = true;
                   child.material.shininess = 100;
                   if (myObj.hasOwnProperty("map")) {
-                    let texture = myObj.hasOwnProperty("map") ? new THREE.TextureLoader(loadingManager).load(myObj.map) : null;
-                    child.material.map = texture;
+                    child.material.map = myObj.hasOwnProperty("map") ? new THREE.TextureLoader(loadingManager).load(myObj.map) : null;
                   }
                   if (myObj.hasOwnProperty("normalMap")) {
-                    let normalMap = myObj.hasOwnProperty("normalMap") ? new THREE.TextureLoader(loadingManager).load(myObj.normalMap) : null;
-                    child.material.normalMap = normalMap;
+                    child.material.normalMap = myObj.hasOwnProperty("normalMap") ? new THREE.TextureLoader(loadingManager).load(myObj.normalMap) : null;
                   }
                 }
               });
@@ -731,6 +565,37 @@
         } catch (e) {
           console.log(e);
         }
+      },
+
+      //新建模型intro
+      //文字渲染有问题！！！
+      createModelsIntro(content, size, position, rotation, webglScene) {
+        let canvas = document.createElement("canvas");
+        canvas.width = 120;
+        canvas.height = 35;
+        let ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#000000";
+        ctx.font="15px Arial";
+        //ctx.lineWidth = 4;
+        ctx.fillText(content,0,15);
+        let texture = new THREE.CanvasTexture(canvas);
+        let infoMaterial = new THREE.MeshPhongMaterial({
+          color: 0xcccccc,
+          map: texture, // 设置纹理贴图
+        });
+
+        let infoGeometry = new THREE.BoxBufferGeometry(size.w, size.h, size.d);
+        let infoMesh = new THREE.Mesh(infoGeometry, infoMaterial);
+        infoMesh.position.set(position.x, position.y, position.z);
+        infoMesh.rotation.set(rotation.x, rotation.y, rotation.z);
+        webglScene.add(infoMesh);
+
+        //圆柱架
+        let cylinderGeometry = new THREE.CylinderBufferGeometry(1, 1, 16, 30);//顶、底半径，高，侧面段数
+        let material = new THREE.MeshBasicMaterial({color: 0x403f3f});
+        let cylinderMesh = new THREE.Mesh(cylinderGeometry, material);
+        cylinderMesh.position.set(infoMesh.position.x, infoMesh.position.y - 9, infoMesh.position.z);
+        webglScene.add(cylinderMesh);
       },
 
       async initModelOfMe() {
@@ -758,7 +623,7 @@
         canvas.width = 120;
         canvas.height = 35;
         let ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffff00";
+        ctx.fillStyle = "#000000";
         ctx.font = "Bold 20px Verdana";
         ctx.lineWidth = 4;
         ctx.fillText(name,0,25);
