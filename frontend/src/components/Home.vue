@@ -16,8 +16,9 @@
           <el-menu-item index="2-3">WB three</el-menu-item>
         </el-submenu>
         <el-menu-item index="3">Message</el-menu-item>
-        <el-menu-item index="4" style="float: right;margin-right: 2%" @click="logoutAccount()">Logout</el-menu-item>
-        <el-menu-item index="5" style="float: right">Account: {{this.username}}</a></el-menu-item>
+        <el-menu-item index="4" @click="turnToQuiz" >Quiz</el-menu-item>
+        <el-menu-item index="5" style="float: right;margin-right: 2%" @click="logoutAccount()">Logout</el-menu-item>
+        <el-menu-item index="6" style="float: right">Account: {{this.username}}</a></el-menu-item>
       </el-menu>
     </div>
 
@@ -71,106 +72,109 @@
 </template>
 
 <script>
-  export default {
-    name: "First",
-    data(){
-      return{
-        username: null,
-        visible: true,
-        flag: 1,
-        data:[],
-        threeData:[
-          {
-            type: 'Three Models',
-            content: 'After you add in the scene, you will see some models in this scene'
-          },
-          {
-            type: 'Move In Map',
-            content: 'If you add in the scene, you can move your position to the location ' +
+export default {
+  name: 'First',
+  data () {
+    return {
+      username: null,
+      visible: true,
+      flag: 1,
+      data: [],
+      threeData: [
+        {
+          type: 'Three Models',
+          content: 'After you add in the scene, you will see some models in this scene'
+        },
+        {
+          type: 'Move In Map',
+          content: 'If you add in the scene, you can move your position to the location ' +
               'of the map anywhere.'
-          },
-          {
-            type: 'Learn In Scene',
-            content: 'In the scene, you can learn something new.'
-          },
-        ],
-        actionData:[
-          {
-            type: 'Move Yourself',
-            content: 'You can move your position by using (up,down,right,left) or (W,A,S,D) to ' +
+        },
+        {
+          type: 'Learn In Scene',
+          content: 'In the scene, you can learn something new.'
+        }
+      ],
+      actionData: [
+        {
+          type: 'Move Yourself',
+          content: 'You can move your position by using (up,down,right,left) or (W,A,S,D) to ' +
               'any position in the Map.'
-          },
-          {
-            type: 'Move Camera and Play the Video',
-            content: 'You can move camera position up and down by using (Y,U) or (V,B) to ' +
+        },
+        {
+          type: 'Move Camera and Play the Video',
+          content: 'You can move camera position up and down by using (Y,U) or (V,B) to ' +
               'certain position in the Map. Can [play the video|pause|replay] by using ( P , \' \' ,' +
               'R) after closing the video.'
-          },
-          {
-            type: 'Chat Dialog',
-            content: 'You can use the key [t] to pop the chat dialog to chat with others.'
-          },
-        ],
-        chatData:[
-          {
-            type: 'Group Chat',
-            content: 'After you add in one scene, you will take part in one public ' +
+        },
+        {
+          type: 'Chat Dialog',
+          content: 'You can use the key [t] to pop the chat dialog to chat with others.'
+        }
+      ],
+      chatData: [
+        {
+          type: 'Group Chat',
+          content: 'After you add in one scene, you will take part in one public ' +
               'group automatically, you can chat with other users in this group.'
-          },
-          {
-            type: 'Single Chat',
-            content: 'After you add in one scene, you will have a list of users ' +
+        },
+        {
+          type: 'Single Chat',
+          content: 'After you add in one scene, you will have a list of users ' +
               'in this group, you can click anyone, then chat with him(her).'
-          },
-          {
-            type: 'Self Chat',
-            content: 'After you add in one scene, the userList will contains you ' +
+        },
+        {
+          type: 'Self Chat',
+          content: 'After you add in one scene, the userList will contains you ' +
               'automatically, you can send some info to yourself.'
-          },
-        ],
+        }
+      ]
+    }
+  },
+  mounted () {
+    this.username = localStorage.getItem('username')
+    this.data = this.chatData
+  },
+  methods: {
+    changeContent (flag) {
+      if (this.flag === flag) {
+        this.visible = !this.visible
+      } else {
+        this.flag = flag
+        this.visible = true
+      }
+      if (this.visible === true) {
+        switch (flag) {
+          case 1:
+            this.data = this.threeData
+            break
+          case 2:
+            this.data = this.actionData
+            break
+          case 3:
+            this.data = this.chatData
+            break
+          default:
+            console.log('Change content error')
+        }
       }
     },
-    mounted(){
-      this.username = localStorage.getItem("username");
-      this.data = this.chatData;
-    },
-    methods:{
-      changeContent(flag){
-        if (this.flag === flag) {
-          this.visible = !this.visible;
-        }else {
-          this.flag = flag;
-          this.visible = true;
-        }
-        if (this.visible === true) {
-          switch (flag) {
-            case 1:
-              this.data = this.threeData;
-              break;
-            case 2:
-              this.data = this.actionData;
-              break;
-            case 3:
-              this.data = this.chatData;
-              break;
-            default:
-              console.log("Change content error");
-          }
-        }
-      },
 
-      logoutAccount(){
-        let token = this.$store.state.token;
-        if (token != null) {
-          // 如果初始登录存在token，则移除
-          localStorage.removeItem('token');
-          localStorage.removeItem('username');
-          this.$store.state.token = null;
-        }
-        this.$router.replace({path: '/'});
+    logoutAccount () {
+      let token = this.$store.state.token
+      if (token != null) {
+        // 如果初始登录存在token，则移除
+        localStorage.removeItem('token')
+        localStorage.removeItem('username')
+        this.$store.state.token = null
       }
+      this.$router.replace({path: '/'})
+    },
+    turnToQuiz () {
+      this.$router.push('/User')
     }
   }
+}
 </script>
 
 <style scoped>

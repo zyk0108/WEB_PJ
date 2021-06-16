@@ -8,8 +8,13 @@ import ThreeDemo from '@/components/ThreeDemo'
 import CarExhibitionHall from '../components/CarExhibitionHall'
 import Chat from '../components/Chat'
 import First from '../components/First'
+import User from '../components/User'
+import UserDefault from '../components/UserDefault'
+import Rank from '../components/Rank'
+import Test from '../components/Test'
+import Check from '../components/Check'
 
-Vue.use(Router);
+Vue.use(Router)
 
 export default new Router({
   // 设置路由位history模式
@@ -54,6 +59,17 @@ export default new Router({
       path: '/Chat',
       name: 'Chat',
       component: Chat
+    },
+    {
+      path: '/User',
+      name: 'User',
+      component: User,
+      children: [
+        {path: '/', component: UserDefault},
+        {path: 'Test', component: Test},
+        {path: 'Rank', component: Rank},
+        {path: 'Check', component: Check}
+      ]
     }
   ]
 })
