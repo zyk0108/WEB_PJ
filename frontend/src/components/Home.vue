@@ -1,5 +1,5 @@
 <template>
-  <div id="first">
+  <div id="home">
     <div id="header" style="width: 100%">
       <el-menu
         :default-active="'1'"
@@ -11,11 +11,11 @@
         <el-menu-item index="1">Home</el-menu-item>
         <el-submenu index="2">
           <template slot="title">WorkBench</template>
-          <el-menu-item index="2-1">WB one</el-menu-item>
-          <el-menu-item index="2-2">WB two</el-menu-item>
-          <el-menu-item index="2-3">WB three</el-menu-item>
+          <el-menu-item index="2-1">WB1</el-menu-item>
+          <el-menu-item index="2-2">WB2</el-menu-item>
+          <el-menu-item index="2-3">WB3</el-menu-item>
         </el-submenu>
-        <el-menu-item index="3">Message</el-menu-item>
+        <el-menu-item index="3" @click="backgroundData()">BackgroundData</el-menu-item>
         <el-menu-item index="4" @click="turnToQuiz" >Quiz</el-menu-item>
         <el-menu-item index="5" style="float: right;margin-right: 2%" @click="logoutAccount()">Logout</el-menu-item>
         <el-menu-item index="6" style="float: right">Account: {{this.username}}</a></el-menu-item>
@@ -73,7 +73,7 @@
 
 <script>
 export default {
-  name: 'First',
+  name: 'Home',
   data () {
     return {
       username: null,
@@ -172,13 +172,17 @@ export default {
     },
     turnToQuiz () {
       this.$router.push('/User')
+    },
+
+    backgroundData(){
+      this.$router.replace({path: '/BackgroundData'})
     }
   }
 }
 </script>
 
 <style scoped>
-  #first{
+  #home{
     background: url("../assets/Home_background.jpg") repeat;
     background-position: center;
     height: 100%;
