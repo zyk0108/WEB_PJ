@@ -14,6 +14,7 @@ import Rank from '../components/Rank'
 import Test from '../components/Test'
 import Check from '../components/Check'
 import BackgroundData from '../components/BackgroundData'
+import Scenes from '../components/Scenes'
 
 Vue.use(Router);
 
@@ -76,6 +77,11 @@ export default new Router({
       path:'/BackgroundData',
       name:'BackgroundData',
       component:BackgroundData
+    },
+    {
+      path:'/Scenes',
+      name:'Scenes',
+      component:Scenes
     }
   ]
 })

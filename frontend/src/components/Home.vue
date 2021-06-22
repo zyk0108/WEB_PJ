@@ -57,9 +57,9 @@
           to explore your journey.
         </div>
         <div>
-          <router-link to="CarExhibitionHall">
+          <router-link to="Scenes">
             <el-button type="primary"
-                       style="margin:10px auto 0px auto;width: 100%;background: #5299db;line-height: 0.8">Cars 3D Exhibition Hall</el-button>
+                       style="margin:10px auto 0px auto;width: 100%;background: #5299db;line-height: 0.8">Cars 3D Exhibition Hall Scenes</el-button>
           </router-link>
         </div>
       </el-card>
@@ -140,20 +140,20 @@ export default {
       if (this.flag === flag) {
         this.visible = !this.visible
       } else {
-        this.flag = flag
+        this.flag = flag;
         this.visible = true
       }
       if (this.visible === true) {
         switch (flag) {
           case 1:
-            this.data = this.threeData
-            break
+            this.data = this.threeData;
+            break;
           case 2:
-            this.data = this.actionData
-            break
+            this.data = this.actionData;
+            break;
           case 3:
             this.data = this.chatData
-            break
+            break;
           default:
             console.log('Change content error')
         }
@@ -161,7 +161,7 @@ export default {
     },
 
     logoutAccount () {
-      let token = this.$store.state.token
+      let token = this.$store.state.token;
       if (token != null) {
         // 如果初始登录存在token，则移除
         localStorage.removeItem('token')

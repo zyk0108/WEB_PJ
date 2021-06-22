@@ -14,7 +14,7 @@
           <el-menu-item index="2-2">WB2</el-menu-item>
           <el-menu-item index="2-3">WB3</el-menu-item>
         </el-submenu>
-        <el-menu-item index="3">Message</el-menu-item>
+        <el-menu-item index="3" v-on:click="goToScenes()">Cars 3D Exhibition Hall Scenes</el-menu-item>
         <el-menu-item index="4" @click="turnToQuiz" >Quiz</el-menu-item>
         <el-menu-item index="5" style="float: right;margin-right: 2%" @click="logoutAccount()">Logout</el-menu-item>
         <el-menu-item index="6" style="float: right">Account: {{this.username}}</a></el-menu-item>
@@ -22,13 +22,49 @@
     </div>
 
     <div class="main">
-      <div id="chart1" style="width: 45%;height: 60%">
 
-      </div>
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <div >
+            <el-button @click="changeContent()">
+              View the background data of mine(change)
+            </el-button>
+          </div>
 
-      <div id="chart2" style="width: 45%;height: 60%;margin-left: 2%">
+        </el-col>
+        <el-col :span="18">
+          <div v-if="this.history" style="width: 80%;background-color: #e4e7ed;padding: 20px;height: 500px;overflow: auto">
+            <el-card style="margin-bottom: 20px">
+              <h4 style="text-align: left;margin: 0">
+                The {{this.username}}'s activities history:
+              </h4>
+            </el-card>
+            <el-timeline :reverse="true">
+              <el-timeline-item
+                v-for="(item , index) in this.historyData"
+                :key="index"
+                :timestamp="item.timestamp"
+                placement="top">
+                <el-card>
+                  <h4>
+                    {{item.content}}
+                  </h4>
+                </el-card>
+              </el-timeline-item>
+            </el-timeline>
+          </div>
+          <div v-if="!this.history">
+            <div id="chart1" style="width: 60%;height: 200px">
 
-      </div>
+            </div>
+
+            <div id="chart2" style="width: 60%;height: 200px;padding-top: 20px">
+
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+
     </div>
 
     <div id="footer">
@@ -45,8 +81,16 @@
     data () {
       return {
         username: null,
-        visible: true,
+        history: true,
 
+        //history data
+        historyData:[
+          // {
+          //   timestamp:"2018/4/3",
+          //   username:"zyk",
+          //   content: "Enter the 3D car models scene.",
+          // }
+        ],
         //data
         option :{
           title: {
@@ -131,24 +175,76 @@
     mounted () {
       this.username = localStorage.getItem('username');
 
-      //画图
-      let chartDom = document.getElementById('chart1');
-      let pieChart = ECharts.init(chartDom,'dark');//深色主题
-      pieChart.setOption(this.option);
-
-      chartDom = document.getElementById('chart2');
-      let barChart = ECharts.init(chartDom,'dark');//深色主题
-      barChart.setOption(this.barOption);
+      // //画图
+      // let chartDom = document.getElementById('chart1');
+      // let pieChart = ECharts.init(chartDom,'dark');//深色主题
+      // pieChart.setOption(this.option);
+      //
+      // chartDom = document.getElementById('chart2');
+      // let barChart = ECharts.init(chartDom,'dark');//深色主题
+      // barChart.setOption(this.barOption);
+      this.getLog();
     },
     methods: {
+      //get the log
+      getLog(){
+        const that=this;
+        // 新建一个promise对象
+        let newPromise = new Promise((resolve) => {
+          resolve()
+        });
+        //然后异步执行
+        newPromise.then(() => {
+          this.$axios.get('/getLog')
+            .then(function (response) {
+              console.log(response);
+              that.historyData=[];
+              for (let i = 0; i < response.data.length; i++) {
+                that.historyData.push({
+                  id:response.data[i].id,
+                  username:response.data[i].username,
+                  timestamp:response.data[i].time,
+                  content:response.data[i].log
+                })
+              }
+              console.log(that.historyData);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+      },
 
+      changeContent(){
+        this.history=!this.history;
+        if (this.history === false) {
+          console.log("kkkkkkk");
+          // 新建一个promise对象
+          let newPromise = new Promise((resolve) => {
+            resolve()
+          });
+          //然后异步执行echarts的初始化函数
+          newPromise.then(() => {
+            //	此dom为echarts图标展示dom
+            //画图
+            let chartDom = document.getElementById('chart1');
+            let pieChart = ECharts.init(chartDom,'dark');//深色主题
+            pieChart.setOption(this.option);
+
+            chartDom = document.getElementById('chart2');
+            let barChart = ECharts.init(chartDom,'dark');//深色主题
+            barChart.setOption(this.barOption);
+          });
+
+        }
+      },
       //路由跳转
       logoutAccount () {
-        let token = this.$store.state.token
+        let token = this.$store.state.token;
         if (token != null) {
           // 如果初始登录存在token，则移除
-          localStorage.removeItem('token')
-          localStorage.removeItem('username')
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
           this.$store.state.token = null
         }
         this.$router.replace({path: '/'})
@@ -158,6 +254,9 @@
       },
       toHome() {
         this.$router.replace({path: '/Home'})
+      },
+      goToScenes(){
+        this.$router.replace("/Scenes")
       }
     }
   }
@@ -174,13 +273,14 @@
   }
   .main{
     width: 100%;
-    height: 100%;
+    height: 800px;
     background-color: #b4bccc;
     opacity: 0.6;
     border-radius: 3px;
     border: solid 3px #8c939d;
     padding: 20px;
-    display: flex;
+    overflow: auto;
+    /*display: flex;*/
   }
   #footer{
     width: 100%;
@@ -199,6 +299,28 @@
   }
   #inner_content{
     text-align: left;
+  }
+  /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+  ::-webkit-scrollbar
+  {
+    width: 5px;  /*滚动条宽度*/
+    height: 5px;  /*滚动条高度*/
+  }
+
+  /*定义滚动条轨道 内阴影+圆角*/
+  ::-webkit-scrollbar-track
+  {
+    /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);*/
+    border-radius: 10px;  /*滚动条的背景区域的圆角*/
+    /*background-color: red;!*滚动条的背景颜色*!*/
+  }
+
+  /*定义滑块 内阴影+圆角*/
+  ::-webkit-scrollbar-thumb
+  {
+    border-radius: 10px;  /*滚动条的圆角*/
+    /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
+    background-color: #000000;  /*滚动条的背景颜色*/
   }
 </style>
 <style>

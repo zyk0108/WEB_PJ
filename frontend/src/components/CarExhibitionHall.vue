@@ -199,7 +199,10 @@
         myPosition:{
           x: 0,
           y: 0,
-          z: 0
+          z: 0,
+          rx:0,
+          ry:0,
+          rz:0
         },
 
         //objects models
@@ -220,10 +223,11 @@
         //用户名列表
         listName:[],
         //场景
-        scene: 'museum'
+        scene: localStorage.getItem("scene"),
       }
     },
     mounted() {
+      console.log(this.scene);
       //chat
       let token = this.$store.state.token;
       if(token==null){
@@ -244,12 +248,32 @@
       this.listName.push(this.userName);
       this.infoList.push({name:this.userName, data:[]});
 
+      //log
+      let newPromise = new Promise((resolve) => {
+        resolve()
+      });
+      //然后异步执行
+      newPromise.then(()=>{
+        let theLog="Enter the 3D car models scene.";
+        this.doLog(theLog);
+      });
       //3D scene
       this.playerMap = new Map();
       this.createScene(document.getElementById("theCanvas"));
       this.animate();
     },
     methods: {
+      //记录行为
+      doLog(log) {
+        this.$axios.post('/log', {
+          log: log
+        }).then(res => {
+          console.log(res);
+        }).catch(error => {
+          console.log(error);
+        });
+      },
+
       //其他人上线
       addUser(userId){
         let obj = this.theObj;
@@ -395,6 +419,7 @@
 
         /*this.addEffects();*/
         window.addEventListener('resize', this.windowResize, false);
+        console.log(this.controls.getObject(),"mmmmmmmmmmmmmmmmmm");
       },
 
       /*******************************create the wall*************************************/
@@ -728,6 +753,9 @@
                 element[0].pause();
               }
             });
+            //记录
+            let theLog = "Pause the playing movie.";
+            this.doLog(theLog);
             break;
 
           case 80://p
@@ -737,6 +765,8 @@
                 element[0].play();
               }
             });
+            theLog = "Play the movie(press the p key to play).";
+            this.doLog(theLog);
             break;
 
           case 82://r
@@ -745,12 +775,53 @@
                 element[0].currentTime = 0;
               }
             });
+            theLog = "Replay the playing movie.";
+            this.doLog(theLog);
             break;
 
           case 84://t
             this.controls.unlock();
-            console.log("uuu");
-            this.showDialogForm();//弹出聊天室
+            theLog = "Eject the chat dialog by press the key T";
+            this.doLog(theLog);
+            break;
+
+          case 81: //Q
+            // let currentPath = this.$router.currentRoute.fullPath;
+            // if (currentPath === '/Home') {
+            //   console.log("Already out.");
+            //   break;
+            // }
+            // this.controls.unlock();
+            // console.log("out");
+            // this.$confirm('This operation will lead you out this scene, continue?', 'Alert', {
+            //   confirmButtonText: 'confirm',
+            //   cancelButtonText: 'cancel',
+            //   type: 'warning'
+            // }).then(() => {
+            //   console.log(this.$router.currentRoute.fullPath);
+            //   currentPath = this.$router.currentRoute.fullPath;
+            //   if (currentPath == "/Home") {
+            //     console.log("Already out.");
+            //   }else{
+            //     this.$message({
+            //       type: 'success',
+            //       message: 'out successfully!'
+            //     });
+            //     this.$router.replace('./Home');
+            //   }
+            // }).catch(() => {
+            //   this.$message({
+            //     type: 'info',
+            //     message: 'the operation cancelled!'
+            //   });
+            // });//弹出提示
+            this.$message({
+              type: 'success',
+              message: 'out successfully!'
+            });
+            this.$router.replace('./Home');
+            theLog = "Press Q to try out the scene.";
+            this.doLog(theLog);
             break;
         }
 
@@ -778,12 +849,10 @@
             this.moveRight = false;
             break;
 
-          case 85: // U
           case 66: // B
             this.moveUp = false;
             break;
 
-          case 89: // Y
           case 86: // V
             this.moveDown = false;
             break;
@@ -908,13 +977,18 @@
           let a=this.controls.getObject().position.x;
           let b=0;
           let c=this.controls.getObject().position.z;
+
+          let rx = this.controls.getObject().rotation.x;
+          let ry = this.controls.getObject().rotation.y;
+          let rz = this.controls.getObject().rotation.z;
           //console.log(a,b,c)
           //调用接口发送更新的数据
 
           this.me.position.set(a,b,c);
+          this.me.rotation.set(rx,ry,rz);
 
           //发送自己的坐标
-          this.judgePosition(a,b,c);
+          this.judgePosition(a,b,c,rx,ry,rz);
 
           //console.log(a,b,c,"eke");
           //相机上下
@@ -932,20 +1006,26 @@
         this.renderer.render(this.webglScene, this.camera);
       },
 
-      judgePosition(x,y,z){
+      judgePosition(x,y,z,rx,ry,rz){
         let srcX = this.myPosition.x;
         let srcY = this.myPosition.y;
         let srcZ = this.myPosition.z;
-        if (x !== srcX || y !== srcY || srcZ !== z) {
-          this.setMyPosition(x,y,z);
-          this.webSocketSend(this.userName,x,y,z,this.theObj.rotation.x,this.theObj.rotation.y,this.theObj.rotation.z);
+        let srcRX = this.myPosition.rx;
+        let srcRY = this.myPosition.ry;
+        let srcRZ = this.myPosition.rz;
+        if (x !== srcX || y !== srcY || srcZ !== z || rx !== srcRX || ry !== srcRY || srcRZ !== rz) {
+          this.setMyPosition(x,y,z,rx,ry,rz);
+          this.webSocketSend(this.userName,x,y,z,rx,ry,rz);
         }
       },
 
-      setMyPosition(x,y,z){
+      setMyPosition(x,y,z,rx,ry,rz){
         this.myPosition.x=x;
         this.myPosition.y=y;
         this.myPosition.z=z;
+        this.myPosition.rx=rx;
+        this.myPosition.ry=ry;
+        this.myPosition.rz=rz;
       },
 
       clickTheScene(){
@@ -1131,6 +1211,8 @@
         //发送消息
         let len = arguments.length;
         if (len === 0) {//判断是否为发送信息
+          let theLog = "Send a message (the dialog).";
+          this.doLog(theLog);
           let message = this.input;
           if (message === '') {
             this.$message.error('Input can not be empty!');
