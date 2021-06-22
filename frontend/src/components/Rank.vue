@@ -7,7 +7,7 @@
         style="width: 100%;  color: #f3a771" >
         <el-table-column
           label="姓名"
-          prop="name"
+          prop="username"
           width="120"
           style="color: #f3a771; background-color: deepskyblue"
         >
@@ -45,7 +45,7 @@ export default {
   },
   methods: {
     fetchRankList () {
-      this.$axios.post('/getRankList')
+      this.$axios.get('/getRankList')
         .then(resp => {
           if (resp.status === 200) {
             console.log(resp.data)

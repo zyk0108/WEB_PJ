@@ -1,6 +1,11 @@
 <template>
   <div class="test-wrapper">
-    <AnswerSheet :question_list="subQuestionList" @transfer = 'postAnswer'/>
+    <div class="but-div">
+      <el-button type="primary" icon="el-icon-edit" @click="newPage">随机题目</el-button>
+    </div>
+    <div class="show-div">
+      <AnswerSheet :question_list="subQuestionList" @transfer = 'postAnswer'/>
+    </div>
   </div>
 </template>
 
@@ -89,8 +94,45 @@ export default {
         'B', 'D', 'B', 'A', 'B', 'C', 'C', 'C', 'B', 'B',
         'B'
       ],
-      subQuestionList: [],
-      subAnswerList: []
+      subQuestionList: [
+        {'name': '1',
+          'question': '现代汽车工业的先驱者之一，人称“汽车鼻祖”的人是?',
+          'choice': [
+            {'value': 'A.戈特利布·戴姆勒'},
+            {'value': 'B.卡尔本茨'},
+            {'value': 'C.亨利福特'},
+            {'value': 'D.巴特勒'}]},
+        {'name': '2',
+          'question': '那一年中国进口第一辆汽车?',
+          'choice': [
+            {'value': 'A.1902'},
+            {'value': 'B.1903'},
+            {'value': 'C.1901'},
+            {'value': 'D.1904'}]},
+        {'name': '3',
+          'question': '世界上第一辆四轮汽车是命名为什么？',
+          'choice': [
+            {'value': 'A.戴姆勒 1 号'},
+            {'value': 'B.奔驰 1 号'},
+            {'value': 'C.超音速汽车'},
+            {'value': 'D.威廉一号'}]},
+        {'name': '4',
+          'question': '日本最大的汽车生产商为（  ）汽车公司',
+          'choice': [
+            {'value': 'A.三菱'},
+            {'value': 'B.丰田'},
+            {'value': 'C.本田'}]},
+        {'name': '5',
+          'question': '阻碍汽车运动的制动力不仅仅取决于制动力矩，还取决于轮胎和路面间的',
+          'choice': [
+            {'value': 'A.压力'},
+            {'value': 'B.摩擦力'},
+            {'value': 'C.附着条件'}
+          ]}
+      ],
+      subAnswerList: [
+        'B', 'C', 'A', 'B', 'B'
+      ]
     }
   },
   created () {
@@ -112,6 +154,9 @@ export default {
       }
       console.log(this.subQuestionList[0])
     },
+    newPage: function () {
+      location.reload()
+    },
     postAnswer: function (msg) {
       let point = 0
       for (let i = 0; i < 5; i++) {
@@ -121,11 +166,11 @@ export default {
       }
       console.log(msg)
       console.log(point)
-      let grade = new FormData()
-      grade.append('identity', localStorage.getItem('username'))
-      grade.append('points', point.toString())
-      console.log(grade.get('points'))
-      this.$axios.post('/updatePoint', grade)
+      localStorage.setItem('mark', point.toString())
+      this.$axios.post('/updatePoint', {
+        username: localStorage.getItem('username'),
+        points: point.toString()
+      })
         .then(resp => {
           if (resp.status === 200) {
             console.log('Success')
@@ -137,7 +182,6 @@ export default {
           console.log(error)
           this.$message.error('Fail to update')
         })
-      localStorage.setItem('mark', point.toString())
       this.$router.push({
         path: 'Check',
         query: {
@@ -149,6 +193,12 @@ export default {
   }
 }
 </script>
-
 <style scoped>
+.but-div{
+  margin: auto;
+}
+.show-div{
+  margin: auto;
+  background-color: white;
+}
 </style>
