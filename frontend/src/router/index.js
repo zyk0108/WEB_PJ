@@ -13,8 +13,9 @@ import UserDefault from '../components/UserDefault'
 import Rank from '../components/Rank'
 import Test from '../components/Test'
 import Check from '../components/Check'
+import BackgroundData from '../components/BackgroundData'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   // 设置路由位history模式
@@ -70,6 +71,11 @@ export default new Router({
         {path: 'Rank', component: Rank},
         {path: 'Check', component: Check}
       ]
+    },
+    {
+      path:'/BackgroundData',
+      name:'BackgroundData',
+      component:BackgroundData
     }
   ]
 })
