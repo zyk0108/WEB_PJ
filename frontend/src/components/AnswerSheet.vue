@@ -25,7 +25,7 @@ export default {
       checkedValue: [] // 单选
     }
   },
-  props: ['question_list'],
+  props: [ 'question_list' ],
   methods: {
     finalCheck: function () {
       if (this.question_list.length !== this.all_list.length) {

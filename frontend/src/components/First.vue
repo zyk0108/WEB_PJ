@@ -171,6 +171,7 @@
         }
       },
       goToLogin(){
+        localStorage.setItem('mark', 'empty')
         this.$router.replace({path: '/Login'});
       },
     }
@@ -225,7 +226,4 @@
   }
 </style>
 <style>
-  .el-menu.el-menu--horizontal {
-    border-bottom: solid 0px #e6e6e6;
-  }
 </style>
