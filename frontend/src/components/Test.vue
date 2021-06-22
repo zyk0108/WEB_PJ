@@ -73,12 +73,12 @@ export default {
             {'value': 'C.桥'},
             {'value': 'D.苹果'}]},
         {'name': '9',
-          'question': '法国标致汽车公司的标志是什么 ？',
+          'question': '世界上第一条汽车装配线是在哪个国家 ？',
           'choice': [
-            {'value': 'A.狮'},
-            {'value': 'B.猫'},
-            {'value': 'C.桥'},
-            {'value': 'D.苹果'}]},
+            {'value': 'A.日本'},
+            {'value': 'B.法国'},
+            {'value': 'C.德国'},
+            {'value': 'D.美国'}]},
         {'name': '10',
           'question': ' N 档是指   （    ）？',
           'choice': [
@@ -88,7 +88,7 @@ export default {
             {'value': 'D.驻车档'}]}
       ],
       answer_list: [
-        'B', 'C', 'A', 'B', 'B', 'A', 'B', 'A', 'A', 'A',
+        'B', 'C', 'A', 'B', 'B', 'A', 'B', 'A', 'D', 'A',
         'D', 'A', 'A', 'C', 'B', 'B', 'B', 'A', 'C', 'B',
         'D', 'B', 'C', 'A', 'A', 'C', 'A', 'A', 'A', 'B',
         'B', 'D', 'B', 'A', 'B', 'C', 'C', 'C', 'B', 'B',
