@@ -23,6 +23,8 @@
     </div>
 
     <div id="instruction">
+      <h3 style="text-align: left;margin: 0;padding-bottom: 10px">Instructions(click to see):</h3>
+      <hr>
       <div>
         <span class="key" @click="changeContent(1)">3D scene</span>
         <el-divider direction="vertical"></el-divider>
@@ -30,11 +32,11 @@
         <el-divider direction="vertical"></el-divider>
         <span class="key" @click="changeContent(3)">Chat Direction</span>
       </div>
-      <hr style="margin-top: 15px">
+      <!--<hr style="margin-top: 15px">-->
       <div id="the_content" v-show="this.visible">
-        <p>
+        <!--<p>
           Here are some instructions about what you just selected.
-        </p>
+        </p>-->
         <div id="inner_content" v-for="(item , index) in this.data" :key="index">
           <el-divider content-position="left">{{item.type}}</el-divider>
           <p>{{item.content}}</p>
@@ -60,6 +62,12 @@
           <router-link to="Scenes">
             <el-button type="primary"
                        style="margin:10px auto 0px auto;width: 100%;background: #5299db;line-height: 0.8">Cars 3D Exhibition Hall Scenes</el-button>
+          </router-link>
+        </div>
+        <div>
+          <router-link to="BackgroundData">
+            <el-button type="primary"
+                       style="margin:10px auto 0px auto;width: 100%;background: #5299db;line-height: 0.8">See the Background Data</el-button>
           </router-link>
         </div>
       </el-card>

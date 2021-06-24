@@ -38,7 +38,7 @@
           <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="130px">
             <el-form-item label="Select the model" prop="model">
               <el-radio-group v-model="ruleForm.model">
-                <el-radio label="Model1"></el-radio>
+                <el-radio label="Model1" v-bind:onclick="changeBackgroundColour()"></el-radio>
                 <el-radio label="Model2"></el-radio>
                 <el-radio label="Model3"></el-radio>
               </el-radio-group>
@@ -49,9 +49,9 @@
               </el-button>
             </div>-->
           </el-form>
-          <img :src="this.sceneData[0].img" style="height: 200px;width: 30%">
-          <img :src="this.sceneData[0].img" style="height: 200px;width: 30%">
-          <img :src="this.sceneData[0].img" style="height: 200px;width: 30%">
+          <img :src="this.modelImages[0]" style="height: 300px;width: 20%" id="model1">
+          <img :src="this.modelImages[1]" style="height: 300px;width: 20%" id="model2">
+          <img :src="this.modelImages[2]" style="height: 300px;width: 20%" id="model3">
         </el-card>
       </div>
       <hr>
@@ -96,6 +96,11 @@
         ruleForm: {
           model: '',
         },
+        modelImages:[
+          '../../static/img/models/model1.JPG',
+          '../../static/img/models/model2.JPG',
+          '../../static/img/models/model3.JPG'
+        ],
         rules: {
           model: [
             { required: true, message: 'Please select the model', trigger: 'change' }
@@ -123,6 +128,30 @@
       this.username = localStorage.getItem('username');
     },
     methods: {
+      changeBackgroundColour(){
+        let dom1 = document.getElementById("model1");
+        let dom2 = document.getElementById("model2");
+        let dom3 = document.getElementById("model3");
+        switch (this.ruleForm.model) {
+          case "Model1":
+            dom1.style.opacity="1";
+            dom2.style.opacity="0.1";
+            dom3.style.opacity="0.1";
+            break;
+          case "Model2":
+            dom1.style.opacity="0.1";
+            dom2.style.opacity="1";
+            dom3.style.opacity="0.1";
+            break;
+          case "Model3":
+            dom1.style.opacity="0.1";
+            dom2.style.opacity="0.1";
+            dom3.style.opacity="1";
+            break;
+          default:
+            break;
+        }
+      },
       goToScene(id){
         if (this.ruleForm.model === '') {
           this.$message({
@@ -207,7 +236,7 @@
     width: 100%;
     height: 84%;
     background-color: #b4bccc;
-    opacity: 0.6;
+    opacity: 0.8;
     border-radius: 3px;
     border: solid 3px #8c939d;
     padding: 20px;

@@ -781,6 +781,8 @@
 
           case 84://t
             this.controls.unlock();
+            console.log("uuu");
+            this.showDialogForm();//弹出聊天室
             theLog = "Eject the chat dialog by press the key T";
             this.doLog(theLog);
             break;
