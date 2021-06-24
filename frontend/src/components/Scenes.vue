@@ -155,7 +155,7 @@
       goToScene(id){
         if (this.ruleForm.model === '') {
           this.$message({
-            message: 'Please select the model!',
+            message: 'Please select the model first!',
             type: 'warning'
           });
           console.log("hh");

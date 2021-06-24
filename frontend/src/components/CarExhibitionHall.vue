@@ -817,6 +817,7 @@
             //     message: 'the operation cancelled!'
             //   });
             // });//弹出提示
+            this.controls.unlock();
             this.$message({
               type: 'success',
               message: 'out successfully!'

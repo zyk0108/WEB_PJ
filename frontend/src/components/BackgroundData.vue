@@ -25,12 +25,27 @@
 
       <el-row :gutter="20">
         <el-col :span="6">
-          <div >
-            <el-button @click="changeContent()">
-              View the background data of mine(change)
+          <div style="text-align: left;padding:0  0 0 30px;overflow: auto">
+            <h3>
+              The background data of {{this.username}}:
+            </h3>
+          </div>
+          <div style="text-align: left;padding:0  0 20px 30px;overflow: auto">
+            <el-button @click="changeContent(1)">
+              History record store in the BG database
             </el-button>
           </div>
-
+          <div style="text-align: left;padding-left: 30px;overflow: auto">
+            <el-button @click="changeContent(2)">
+              View the background data of charts type
+            </el-button>
+          </div>
+          <div style="text-align: left;padding:0  0 0 30px;overflow: auto">
+            <h5>
+              Hints:<br> In order to see the data directly of the e-chart type, you should enter the scene first.
+              And put the cursor on the chart, you will see the detail.
+            </h5>
+          </div>
         </el-col>
         <el-col :span="18">
           <div v-if="this.history" style="width: 80%;background-color: #e4e7ed;padding: 20px;height: 500px;overflow: auto">
@@ -54,11 +69,11 @@
             </el-timeline>
           </div>
           <div v-if="!this.history">
-            <div id="chart1" style="width: 60%;height: 200px">
+            <div id="chart1" style="width: 60%;height: 320px">
 
             </div>
 
-            <div id="chart2" style="width: 60%;height: 200px;padding-top: 20px">
+            <div id="chart2" style="width: 60%;height: 320px;padding-top: 20px">
 
             </div>
           </div>
@@ -84,18 +99,12 @@
         history: true,
 
         //history data
-        historyData:[
-          // {
-          //   timestamp:"2018/4/3",
-          //   username:"zyk",
-          //   content: "Enter the 3D car models scene.",
-          // }
-        ],
+        historyData:[],
         //data
         option :{
           title: {
-            text: '某站点用户访问来源',
-            subtext: '纯属虚构',
+            text: 'History data analysis(PIE)',
+            subtext: 'Data come from database record',
             left: 'center'
           },
           tooltip: {
@@ -107,15 +116,15 @@
           },
           series: [
             {
-              name: '访问来源',
+              name: 'come from',
               type: 'pie',
               radius: '50%',
               data: [
-                {value: 1048, name: '搜索引擎'},
-                {value: 735, name: '直接访问'},
-                {value: 580, name: '邮件营销'},
-                {value: 484, name: '联盟广告'},
-                {value: 300, name: '视频广告'}
+                {value: 0, name: 'Num of enter the scene'},
+                {value: 0, name: 'Num of send message'},
+                {value: 0, name: 'Num of play/pause/replay movie'},
+                {value: 0, name: 'Num of out the scene'},
+                {value: 0, name: 'Sum of the records'},
               ],
               emphasis: {
                 itemStyle: {
@@ -131,8 +140,8 @@
         //bar
         barOption: {
           title: {
-            text: '世界人口总量',
-            subtext: '数据来自网络'
+            text: 'History data analysis',
+            subtext: 'Data come from database record'
           },
           tooltip: {
             trigger: 'axis',
@@ -141,7 +150,7 @@
             }
           },
           legend: {
-            data: ['2011年', '2012年']
+            data: ['Sum of the records', 'Num of the record']
           },
           grid: {
             left: '3%',
@@ -155,18 +164,18 @@
           },
           yAxis: {
             type: 'category',
-            data: ['巴西', '印尼', '美国', '印度', '中国', '世界人口(万)']
+            data: ['Num of enter the scene', 'Num of send message', 'Num of play/pause/replay movie', 'Num of out the scene']
           },
           series: [
             {
-              name: '2011年',
+              name: 'Sum of the records',
               type: 'bar',
-              data: [18203, 23489, 29034, 104970, 131744, 630230]
+              data: [0,0,0,0]
             },
             {
-              name: '2012年',
+              name: 'Num of the record',
               type: 'bar',
-              data: [19325, 23438, 31000, 121594, 134141, 681807]
+              data: [0,0,0,0]
             }
           ]
         }
@@ -174,15 +183,6 @@
     },
     mounted () {
       this.username = localStorage.getItem('username');
-
-      // //画图
-      // let chartDom = document.getElementById('chart1');
-      // let pieChart = ECharts.init(chartDom,'dark');//深色主题
-      // pieChart.setOption(this.option);
-      //
-      // chartDom = document.getElementById('chart2');
-      // let barChart = ECharts.init(chartDom,'dark');//深色主题
-      // barChart.setOption(this.barOption);
       this.getLog();
     },
     methods: {
@@ -215,17 +215,17 @@
         })
       },
 
-      changeContent(){
-        this.history=!this.history;
-        if (this.history === false) {
-          console.log("kkkkkkk");
+      changeContent(id){
+        if (id === 1) {
+          this.history = true;
+        }else if (id === 2) {
+          this.history = false;
           // 新建一个promise对象
           let newPromise = new Promise((resolve) => {
             resolve()
           });
-          //然后异步执行echarts的初始化函数
+          //然后异步执行Echarts的初始化函数
           newPromise.then(() => {
-            //	此dom为echarts图标展示dom
             //画图
             let chartDom = document.getElementById('chart1');
             let pieChart = ECharts.init(chartDom,'dark');//深色主题
@@ -235,7 +235,6 @@
             let barChart = ECharts.init(chartDom,'dark');//深色主题
             barChart.setOption(this.barOption);
           });
-
         }
       },
       //路由跳转
@@ -273,7 +272,7 @@
   }
   .main{
     width: 100%;
-    height: 800px;
+    height: 82%;
     background-color: #b4bccc;
     opacity: 0.6;
     border-radius: 3px;
