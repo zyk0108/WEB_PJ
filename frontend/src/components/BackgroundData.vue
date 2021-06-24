@@ -101,7 +101,7 @@
         //history data
         historyData:[],
         //data
-        option :{
+        pieOption :{
           title: {
             text: 'History data analysis(PIE)',
             subtext: 'Data come from database record',
@@ -124,6 +124,7 @@
                 {value: 0, name: 'Num of send message'},
                 {value: 0, name: 'Num of play/pause/replay movie'},
                 {value: 0, name: 'Num of out the scene'},
+                {value: 0, name: 'Num of eject the chat dialog'},
                 {value: 0, name: 'Sum of the records'},
               ],
               emphasis: {
@@ -164,18 +165,18 @@
           },
           yAxis: {
             type: 'category',
-            data: ['Num of enter the scene', 'Num of send message', 'Num of play/pause/replay movie', 'Num of out the scene']
+            data: ['Num of enter the scene', 'Num of send message', 'Num of play/pause/replay movie', 'Num of out the scene','Num of eject the chat dialog']
           },
           series: [
             {
               name: 'Sum of the records',
               type: 'bar',
-              data: [0,0,0,0]
+              data: [0,0,0,0,0]
             },
             {
               name: 'Num of the record',
               type: 'bar',
-              data: [0,0,0,0]
+              data: [0,0,0,0,0]
             }
           ]
         }
@@ -220,6 +221,51 @@
           this.history = true;
         }else if (id === 2) {
           this.history = false;
+          //更新option数据
+          let sum = this.historyData.length;
+          let enter=0,send=0,movie=0,out=0,chat=0;
+          for (let i = 0; i < sum; i++) {
+            let record = this.historyData[i].content;
+            let str = record.split(" ")[0];
+            switch (str) {
+              case "Enter":
+                enter++;
+                break;
+              case "Press":
+                out++;
+                break;
+              case "Play"||"Replay"||"Pause":
+                movie++;
+                break;
+              case "Send":
+                send++;
+                break;
+              case "Eject":
+                chat++;
+                break;
+            }
+          }
+          //更新
+          //1.pie
+          let pieChangeData=this.pieOption.series[0].data;
+          pieChangeData[0].value=enter;
+          pieChangeData[1].value=send;
+          pieChangeData[2].value=movie;
+          pieChangeData[3].value=out;
+          pieChangeData[4].value=chat;
+          pieChangeData[5].value=sum;
+          //2.bar
+          let arr=[];
+          for (let i = 0; i < 5; i++) {
+            this.barOption.series[0].data[i]=sum;
+          }
+          let barChangeData=this.barOption.series[1];
+          barChangeData.data[0]=enter;
+          barChangeData.data[1]=send;
+          barChangeData.data[2]=movie;
+          barChangeData.data[3]=out;
+          barChangeData.data[4]=chat;
+
           // 新建一个promise对象
           let newPromise = new Promise((resolve) => {
             resolve()
@@ -229,7 +275,7 @@
             //画图
             let chartDom = document.getElementById('chart1');
             let pieChart = ECharts.init(chartDom,'dark');//深色主题
-            pieChart.setOption(this.option);
+            pieChart.setOption(this.pieOption);
 
             chartDom = document.getElementById('chart2');
             let barChart = ECharts.init(chartDom,'dark');//深色主题
