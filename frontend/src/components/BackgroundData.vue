@@ -255,7 +255,6 @@
           pieChangeData[4].value=chat;
           pieChangeData[5].value=sum;
           //2.bar
-          let arr=[];
           for (let i = 0; i < 5; i++) {
             this.barOption.series[0].data[i]=sum;
           }
