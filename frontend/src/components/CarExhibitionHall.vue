@@ -89,6 +89,27 @@
         </el-col>
       </el-row>
     </el-dialog>
+    <el-dialog title="THE Helper(press C to close)" :visible.sync="helpVisible" style="opacity: 1;width: 80%">
+      <el-card :body-style="{ padding: '5px' }" shadow="never">
+        <h5>
+          Question:
+        </h5>
+        <!--左边用户栏-->
+        <div v-for="(question,index) in this.helpData.Question" :key="index" style="text-align: left">
+          <el-card>
+            {{question.Q}}
+          </el-card>
+        </div>
+        <h5>
+          Answer:
+        </h5>
+        <div v-for="(answer,index) in this.helpData.Answer" :key="index">
+          <el-card>
+            {{answer}}
+          </el-card>
+        </div>
+      </el-card>
+    </el-dialog>
     <section id="loading-screen">
       <div id="loader"></div>
       <h1 class="begin-text">Wait a moment, loading models will take some time...</h1>
@@ -113,6 +134,7 @@
   import JWT from 'jwt-decode'
   import * as ModelsData from '../../static/data/ModelsData'
   import * as WallsData from '../../static/data/CarHallData'
+  import * as HelpData from '../../static/data/Help'
   export default {
     name: "CarExhibitionHall",
     data(){
@@ -138,6 +160,11 @@
         wallCollider: [],//碰撞
         wallMaterial: null,
         infoMaterial: null,
+        helpVisible:false,
+        helpData: {
+          Question:[],
+          Answer:["press the corresponding key..."]
+        },
 
         //for videos
         videoObj: [],
@@ -190,7 +217,7 @@
         },
         theObj1: {
           obj: '../../static/models/soldier.glb',
-          scale: 4,
+          scale: 6,
           position: {x: -300, y: 0, z: -110},
           rotation: {x: 0, y: 380, z: 0},
         },
@@ -402,6 +429,11 @@
           console.log(ele);
         });
 
+        //load NPC
+        this.loadNPC().then((ele)=>{
+          console.log(ele);
+        });
+
         //load the models
         this.loadModels().then((list)=>{
           console.log(list,"models")
@@ -598,6 +630,25 @@
               //object.name = 'myObj01';
             }
           }
+        } catch (e) {
+          console.log(e);
+        }
+      },
+
+      //load NPC
+      async loadNPC() {
+        let obj=this.theObj;
+        let loader = new GLTFLoader();
+        try {
+          await loader.load(obj.obj,(model)=>{
+            console.log(model,'load NPC');
+            model.scene.position.set(-10, -4, -410);
+            model.scene.scale.set(obj.scale, obj.scale, obj.scale);
+            model.scene.rotation.set(0, 250, 0);
+            this.addTheName("NPC(->N)",model.scene);
+            this.root.add(model.scene);
+          });
+          return [];
         } catch (e) {
           console.log(e);
         }
@@ -838,6 +889,7 @@
             //   });
             // });//弹出提示
             this.controls.unlock();
+            this.webSocketClose();
             this.$message({
               type: 'success',
               message: 'out successfully!'
@@ -854,6 +906,37 @@
           case 88: //X 翻转方向
             ry = this.myPosition.ry-Math.PI/4;
             this.me.rotation.set(0,ry,0);
+            break;
+
+          case 72://H
+            if (this.helpVisible === true) {
+              this.helpData.Answer=HelpData.Answer[2].H;
+            }
+            break;
+          case 49://1
+            if (this.helpVisible === true) {
+              this.helpData.Answer=HelpData.Answer[0].A;
+            }
+            break;
+          case 50://2
+            if (this.helpVisible === true) {
+              this.helpData.Answer=HelpData.Answer[1].A;
+            }
+            break;
+          case 78://N
+            if (this.helpVisible === false) {
+              let x,y,z;
+              x=this.myPosition.x;
+              z=this.myPosition.z;
+              if(Math.abs(x+10)<=30 && Math.abs(z+410)<=30){
+                this.helpVisible = true;
+              }
+            }
+            this.helpData.Question=HelpData.Question;
+            break;
+
+          case 67: //C
+            this.helpVisible=false;
             break;
         }
 
