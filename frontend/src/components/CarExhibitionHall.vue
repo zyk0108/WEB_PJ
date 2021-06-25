@@ -188,6 +188,18 @@
           position: {x: -300, y: 0, z: -110},
           rotation: {x: 0, y: 380, z: 0},
         },
+        theObj1: {
+          obj: '../../static/models/soldier.glb',
+          scale: 4,
+          position: {x: -300, y: 0, z: -110},
+          rotation: {x: 0, y: 380, z: 0},
+        },
+        theObj3: {
+          obj: '../../static/models/Xbot.glb',
+          scale: 8,
+          position: {x: -300, y: 0, z: -110},
+          rotation: {x: 0, y: 380, z: 0},
+        },
         me:[],
 
         playerMap:null,
@@ -623,7 +635,15 @@
       },
 
       async initModelOfMe() {
-        let obj = this.theObj;
+        let theModel =localStorage.getItem("model");
+        let obj;
+        if ( theModel === "1") {
+           obj= this.theObj1;
+        } else if (theModel === "3") {
+          obj = this.theObj3;
+        }else {
+          obj = this.theObj;
+        }
         let loader = new GLTFLoader();
         try {
           await loader.load(obj.obj,(model)=>{

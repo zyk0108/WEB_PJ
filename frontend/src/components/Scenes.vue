@@ -137,16 +137,19 @@
             dom1.style.opacity="1";
             dom2.style.opacity="0.1";
             dom3.style.opacity="0.1";
+            localStorage.setItem("model","1");
             break;
           case "Model2":
             dom1.style.opacity="0.1";
             dom2.style.opacity="1";
             dom3.style.opacity="0.1";
+            localStorage.setItem("model","2");
             break;
           case "Model3":
             dom1.style.opacity="0.1";
             dom2.style.opacity="0.1";
             dom3.style.opacity="1";
+            localStorage.setItem("model","3");
             break;
           default:
             break;
