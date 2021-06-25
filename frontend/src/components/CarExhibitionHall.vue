@@ -201,7 +201,7 @@
           y: 0,
           z: 0,
           rx:0,
-          ry:0,
+          ry:380,
           rz:0
         },
 
@@ -826,6 +826,15 @@
             theLog = "Press Q to try out the scene.";
             this.doLog(theLog);
             break;
+
+          case 90: //Z 翻转方向
+            let ry = this.myPosition.ry+Math.PI/4;
+            this.me.rotation.set(0,ry,0);
+            break;
+          case 88: //X 翻转方向
+            ry = this.myPosition.ry-Math.PI/4;
+            this.me.rotation.set(0,ry,0);
+            break;
         }
 
       },
@@ -895,7 +904,6 @@
 
           let time = performance.now();
           let delta = (time - this.prevTime) / 1000;
-          //console.log(delta,"[[[[[[[[[[[[[[[[[");
           // load for the videos
           this.videoObj.forEach(element => {
             if (element[0].readyState === element[0].HAVE_ENOUGH_DATA) { //element[0]:video
@@ -981,9 +989,11 @@
           let b=0;
           let c=this.controls.getObject().position.z;
 
-          let rx = this.controls.getObject().rotation.x;
-          let ry = this.controls.getObject().rotation.y;
-          let rz = this.controls.getObject().rotation.z;
+          // let rx = this.controls.getObject().rotation.x;
+          // let ry = this.controls.getObject().rotation.y;
+          // let rz = this.controls.getObject().rotation.z;
+          let rx=0,rz=0;
+          let ry = this.me.rotation.y;
           //console.log(a,b,c)
           //调用接口发送更新的数据
 
